@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Operators</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+        <!--empty for now.-->
+      </nav>
+    </header>
+    <main>
+      <section>
+        <h2>Operators</h2>
+        <form action="/submit" method="post">
+          <label for="barcode">Tracking Barcode</label>
+          <input
+            type="text"
+            id="barcode"
+            name="barcode"
+            required
+            pattern="^\d{4}(?:-\d{4}){2}$"
+            title="Barcode should be 12 numbers with every 4 digits seperated by a hyphen: XXXX-XXXX-XXXX"
+          />
+
+          <label for="length">Package Length</label>
+          <input
+            type="number"
+            id="length"
+            name="length"
+            required
+            min="1"
+            max="48"
+            step="0.1"
+          />
+          <span> ″</span>
+
+          <label for="width">Package Width</label>
+          <input
+            type="number"
+            id="width"
+            name="width"
+            required
+            min="1"
+            max="48"
+            step="0.1"
+          />
+          <span> ″</span>
+
+          <label for="height">Package Height</label>
+          <input
+            type="number"
+            id="height"
+            name="height"
+            required
+            min="1"
+            max="48"
+            step="0.1"
+          />
+          <span> ″</span>
+
+          <label for="weight">Package Weight</label>
+          <input
+            type="number"
+            id="weight"
+            name="weight"
+            required
+            min="0"
+            max="120"
+            step="0.1"
+          />
+          <span> lb</span>
+
+          <label>Delivery Priority</label>
+
+          <label>
+            <input type="radio" name="priority" value="low" />
+            Low
+          </label>
+
+          <label>
+            <input type="radio" name="priority" value="standard" checked />
+            Standard
+          </label>
+
+          <label>
+            <input type="radio" name="priority" value="urgent" />
+            Urgent
+          </label>
+
+          <label for="building-code">Destination Building Code</label>
+
+          <input
+            type="text"
+            id="building-code"
+            name="building-code"
+            pattern="^[A-Za-z]{2}$"
+            title="Please enter in a two character building code."
+            required
+          />
+
+          <img
+            src="map.png"
+            alt="Image map of the university."
+            height="300"
+            width="630"
+          />
+          <br />
+
+          <label for="locker">Delivery Locker Array</label>
+
+          <!-- For when we do js, I think we will need to ensure that the options for the locker changes based off of building-->
+          <select id="locker" name="locker" required>
+            <option value="" selected disabled>Select Locker Array</option>
+            <option value="locker-a">Locker Array 1</option>
+            <option value="locker-b">Locker Array 2</option>
+            <option value="locker-c">Locker Array 3</option>
+          </select>
+
+          <label for="instructions"
+            >Special Delivery Instructions (optional)</label
+          >
+
+          <textarea name="instructions" id="instructions" rows="5"></textarea>
+
+          <button type="submit">Check Package In</button>
+        </form>
+      </section>
+    </main>
+    <footer>
+      <!--Empty for now also-->
+    </footer>
+  </body>
+</html>
