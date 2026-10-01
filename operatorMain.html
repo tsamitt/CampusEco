@@ -27,6 +27,17 @@
 
           <a href="operatorPackageInput.html">Check In New Package</a>
 
+          <form>
+            <label for="package-search">Search Packages</label>
+            <input
+              type="search"
+              id="package-search"
+              name="package-search"
+              placeholder="Search by tracking barcode"
+            />
+            <button type="button">Search</button>
+          </form>
+          
           <table>
             <caption>
               Recently checked-in packages
@@ -41,6 +52,7 @@
                 <th scope="col">Weight</th>
                 <th scope="col">Priority</th>
                 <th scope="col">Status</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
 
@@ -53,6 +65,11 @@
                 <td>8.5 lb</td>
                 <td>Standard</td>
                 <td>Checked In</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Edit</button>
+                  <button type="button">Cancel</button>
+                </td>
               </tr>
 
               <tr>
@@ -63,6 +80,11 @@
                 <td>15.2 lb</td>
                 <td>Urgent</td>
                 <td>Awaiting Pickup</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Edit</button>
+                  <button type="button">Cancel</button>
+                </td>
               </tr>
 
               <tr>
@@ -73,6 +95,11 @@
                 <td>4.7 lb</td>
                 <td>Low</td>
                 <td>Loaded</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Edit</button>
+                  <button type="button">Cancel</button>
+                </td>
               </tr>
 
               <tr>
@@ -83,6 +110,11 @@
                 <td>32.4 lb</td>
                 <td>Urgent</td>
                 <td>On the Way</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Edit</button>
+                  <button type="button">Cancel</button>
+                </td>
               </tr>
             </tbody>
           </table>
