@@ -19,6 +19,7 @@
     <main>
       <section>
         <h2>Operators</h2>
+        <a href="operatorMain.html">Back</a>
         <form action="/submit" method="post">
           <label for="barcode">Tracking Barcode</label>
           <input
@@ -27,7 +28,7 @@
             name="barcode"
             required
             pattern="^\d{4}(?:-\d{4}){2}$"
-            title="Barcode should be 12 numbers with every 4 digits seperated by a hyphen: XXXX-XXXX-XXXX"
+            title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
           />
 
           <label for="length">Package Length</label>
@@ -112,8 +113,6 @@
             height="300"
             width="630"
           />
-          <br />
-
           <label for="locker">Delivery Locker Array</label>
 
           <!-- For when we do js, I think we will need to ensure that the options for the locker changes based off of building-->
@@ -124,9 +123,11 @@
             <option value="locker-c">Locker Array 3</option>
           </select>
 
-          <label for="instructions"
-            >Special Delivery Instructions (optional)</label
-          >
+          <label for="has-special-instructions">Has Special Instructions</label>
+          <input type="checkbox" />
+          <!--When doing JS, this text area should only showup if the checkbox is checked.-->
+
+          <label for="instructions"> Instructions</label>
 
           <textarea name="instructions" id="instructions" rows="5"></textarea>
 
