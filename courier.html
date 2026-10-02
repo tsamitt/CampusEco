@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Couriers</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Couriers</h2>
+
+        <section>
+          <h3>Delivery Activity</h3>
+
+          <div>
+            <a href="courierUpdate.html">Claim or Update Delivery</a>
+          </div>
+          
+          <div>
+            <a href="courierRegister.html">Courier Registration</a>
+          </div>
+          
+
+          <table>
+            <caption>
+              Route queue: deliveries waiting to be claimed
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Stop</th>
+                <th scope="col">Tracking Barcode</th>
+                <th scope="col">Building</th>
+                <th scope="col">Locker Array</th>
+                <th scope="col">Weight</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>1111-2222-3333</td>
+                <td>CS</td>
+                <td>Locker Array 2</td>
+                <td>15.2 lb</td>
+                <td>Urgent</td>
+                <td>Awaiting Pickup</td>
+                <td>
+                  <button type="button">Claim</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td>2</td>
+                <td>1234-5678-9012</td>
+                <td>AH</td>
+                <td>Locker Array 1</td>
+                <td>8.5 lb</td>
+                <td>Standard</td>
+                <td>Checked In</td>
+                <td>
+                  <button type="button">Claim</button>
+                </td>
+              </tr>
+
+              <tr>
+                <td>3</td>
+                <td>3333-4444-5555</td>
+                <td>AH</td>
+                <td>Locker Array 3</td>
+                <td>4.7 lb</td>
+                <td>Low</td>
+                <td>Checked In</td>
+                <td>
+                  <button type="button">Claim</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>My Deliveries</h3>
+
+          <table>
+            <caption>
+              <div>
+                <strong>Deliveries you have claimed </strong>
+              </div>
+
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Tracking Barcode</th>
+                <th scope="col">Building</th>
+                <th scope="col">Locker Array</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>3141-5926-5358</td>
+                <td>FH</td>
+                <td>Locker Array 1</td>
+                <td>Urgent</td>
+                <td>Loaded</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Update Status</button>
+                </td>
+              </tr>
+              <tr>
+                <td>7777-8888-9999</td>
+                <td>CS</td>
+                <td>Locker Array 2</td>
+                <td>Standard</td>
+                <td>En Route</td>
+                <td>
+                  <button type="button">View</button>
+                  <button type="button">Update Status</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+    </footer>
+  </body>
+</html>
