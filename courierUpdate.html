@@ -50,7 +50,7 @@
             
             <div>
               <label>
-                <input type="checkbox" name="claim-confirm" required /> I confirm I can carry this delivery *
+                <input type="checkbox" name="claim-confirm" required /> I confirm I can carry this delivery in my load *
               </label>
             </div>
             
@@ -108,6 +108,66 @@
           </form>
           </form>
       </section>
+
+      <section>
+          <h3>Report Battery Status</h3>
+
+          <form>
+            <p>* Required field</p>
+
+            <label for="battery-cart">Cart *</label>
+            <select id="battery-cart" name="battery-cart" required>
+              <option value="">Select a cart</option>
+              <option value="cart-1">Cart 1</option>
+              <option value="cart-2">Cart 2</option>
+              <option value="cart-3">Cart 3</option>
+            </select>
+
+            <label for="battery-level">Battery Level (%) *</label>
+            <input
+              type="number"
+              id="battery-level"
+              name="battery-level"
+              min="0"
+              max="100"
+              required
+            />
+
+            <fieldset>
+              <legend>Report Type *</legend>
+              <label>
+                <input type="radio" name="report-type" value="start" required />
+                Start of shift
+              </label>
+              <label>
+                <input type="radio" name="report-type" value="mid" />
+                Mid-shift
+              </label>
+              <label>
+                <input type="radio" name="report-type" value="end" />
+                End of shift
+              </label>
+            </fieldset>
+
+            <fieldset>
+              <legend>Issues</legend>
+              <label>
+                <input type="checkbox" name="issue" value="charge" />
+                Needs to be Charged
+              </label>
+              <label>
+                <input type="checkbox" name="issue" value="slow" />
+                Reduced speed
+              </label>
+              <label>
+                <input type="checkbox" name="issue" value="warning" />
+                Warning light on
+              </label>
+            </fieldset>
+
+            <button type="submit">Submit Report</button>
+          </form>
+        </section>
     </main>
 
     <footer>
