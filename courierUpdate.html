@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Courier Updates</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Courier Updates</h2>
+
+        <a href="courier.html">Back to Courier Dashboard</a>
+
+        <section>
+          <h3>Claim a Delivery</h3>
+          <form>
+            <p>* Required field</p>
+            
+            <div>
+              <label for="claim-barcode">Tracking Barcode *</label>
+              <input type="text" id="claim-barcode" name="claim-barcode" placeholder="1234-5678-9012" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}" title="Format: 4 digits, dash, 4 digits, dash, 4 digits" required />
+            </div>
+            
+            <div>
+              <label for="claim-cart">Cart *</label>
+              <select id="claim-cart" name="claim-cart" required>
+                <option value="">Select a cart</option>
+                <option value="cart-1">Cart 1</option>
+                <option value="cart-2">Cart 2</option>
+                <option value="cart-3">Cart 3</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="claim-weight">Verified Weight (lb, max 150) *</label>
+              <input type="number" id="claim-weight" name="claim-weight" min="0.1" max="150" step="0.1" required />
+            </div>
+            
+            <div>
+              <label>
+                <input type="checkbox" name="claim-confirm" required /> I confirm I can carry this delivery *
+              </label>
+            </div>
+            
+            <div>
+              <button type="submit">Claim Delivery</button>
+              <button type="reset">Clear</button>
+            </div>
+          </form>
+        </section>
+
+        <section>
+          <h3>Update Transit Milestone</h3>
+
+          <form>
+            <p>* Required field</p>
+
+            <label for="status-barcode">Tracking Barcode *</label>
+            <input
+              type="text"
+              id="status-barcode"
+              name="status-barcode"
+              placeholder="1234-5678-9012"
+              pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}"
+              title="Format: 4 digits, dash, 4 digits, dash, 4 digits"
+              required
+            />
+
+            <fieldset> <!-- Requires user to select deliver status -->
+              <legend>New Status *</legend>
+              <label>
+                <input type="radio" name="status" value="loaded" required />
+                Loaded
+              </label>
+              <label>
+                <input type="radio" name="status" value="en-route" />
+                En Route
+              </label>
+              <label>
+                <input type="radio" name="status" value="delivered" />
+                Delivered
+              </label>
+            </fieldset>
+
+            <label for="status-notes">Notes?</label>
+            <textarea
+              id="status-notes"
+              name="status-notes"
+              rows="3"
+              maxlength="250"
+            ></textarea>
+
+            <button type="submit">Update Status</button>
+
+             <button type="submit">Submit Report</button>
+          </form>
+          </form>
+      </section>
+    </main>
+
+    <footer>
+      <!--Empty for now next phase-->
+    </footer>
+  </body>
+</html>
