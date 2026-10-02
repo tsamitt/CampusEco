@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Courier Registration</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Courier Registration</h2>
+
+        <a href="courier.html">Back to Courier Dashboard</a>
+
+        <section>
+          <h3>Create a Courier Account</h3>
+
+          <form>
+            <p>* Required field</p> <!-- Requires user to input data and valid email address -->
+
+            <label for="reg-name">Full Name *</label>
+            <input type="text" id="reg-name" name="reg-name" required />
+
+            <label for="reg-email">Email Address *</label>
+            <input
+              type="email"
+              id="reg-email"
+              name="reg-email"
+              placeholder="name@mnsu.edu"
+              required
+            />
+
+            <label for="reg-password">Password *</label>
+            <input
+              type="password"
+              id="reg-password"
+              name="reg-password"
+              minlength="8"
+              required
+            />
+
+            <label for="reg-shift">Preferred Shift *</label>
+            <select id="reg-shift" name="reg-shift" required>
+              <option value="">Select a shift</option>
+              <option value="morning">Morning</option>
+              <option value="midday">Midday</option>
+              <option value="afternoon">Afternoon</option>
+            </select>
+
+            <fieldset>
+              <legend>Role *</legend> <!-- Requires the user to choose delivery type -->
+              <label>
+                <input type="radio" name="role" value="driver" required />
+                Delivery Driver
+              </label>
+              <label>
+                <input type="radio" name="role" value="walker" />
+                Walking Courier
+              </label>
+            </fieldset>
+
+            <button type="submit">Register</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <!--Empty for now next phase-->
+    </footer>
+  </body>
+</html>
