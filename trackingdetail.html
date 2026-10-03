@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Package Details</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+        <!--empty for now.-->
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Package Details</h2>
+
+        <a href="tracking.html">Back to Your Packages</a>
+
+        <section>
+          <h3>Package Information</h3>
+
+          <table>
+            <caption>
+              Tracking Barcode 3141-5926-5358
+            </caption>
+
+            <tbody>
+              <tr>
+                <th scope="row">Tracking Barcode</th>
+                <td>3141-5926-5358</td>
+              </tr>
+              <tr>
+                <th scope="row">Destination Building</th>
+                <td>FH, Ford Hall</td>
+              </tr>
+              <tr>
+                <th scope="row">Locker Array</th>
+                <td>Locker Array 1</td>
+              </tr>
+              <tr>
+                <th scope="row">Weight</th>
+                <td>32.4 lb</td>
+              </tr>
+              <tr>
+                <th scope="row">Priority</th>
+                <td>Urgent</td>
+              </tr>
+              <tr>
+                <th scope="row">Current Status</th>
+                <td>En Route</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>Delivery Status</h3>
+
+          <table>
+            <caption>
+              Delivery milestones for this package
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Milestone</th>
+                <th scope="col">Timestamp</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Checked In</td>
+                <td>Oct 1, 9:14 AM</td>
+                <td>Complete</td>
+              </tr>
+              <tr>
+                <td>Loaded</td>
+                <td>Oct 2, 10:05 AM</td>
+                <td>Complete</td>
+              </tr>
+              <tr>
+                <td>En Route</td>
+                <td>Oct 2, 11:40 AM</td>
+                <td>Current</td>
+              </tr>
+              <tr>
+                <td>Delivered</td>
+                <td>&ndash;</td>
+                <td>Pending</td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- Status highlighting (e.g. a progress bar) will be added with JS/CSS in Phase 2. -->
+        </section>
+
+        <section>
+          <h3>Confirm Receipt</h3>
+
+          <p>* Required field</p>
+          <!-- A real signature pad and server-side verification will be added in Phase 2/3. For now this is a typed confirmation. -->
+
+          <form action="/submit" method="post">
+            <label for="recipient-name">Recipient Name *</label>
+            <input
+              type="text"
+              id="recipient-name"
+              name="recipient-name"
+              required
+            />
+
+            <fieldset>
+              <legend>Condition on Arrival *</legend>
+              <label>
+                <input type="radio" name="condition" value="good" required />
+                Good condition
+              </label>
+              <label>
+                <input type="radio" name="condition" value="damaged" />
+                Damaged
+              </label>
+            </fieldset>
+
+            <label>
+              <input type="checkbox" id="confirm-receipt" name="confirm-receipt" required />
+              I confirm I received this package *
+            </label>
+
+            <label for="receipt-notes">Notes (optional)</label>
+            <textarea name="receipt-notes" id="receipt-notes" rows="3"></textarea>
+
+            <button type="submit">Sign and Confirm Receipt</button>
+          </form>
+        </section>
+
+        <section>
+          <h3>Carbon Footprint for This Delivery</h3>
+
+          <table>
+            <caption>
+              Estimated environmental impact of delivering this package by electric cart
+            </caption>
+
+            <tbody>
+              <tr>
+                <th scope="row">Distance Covered by Cart</th>
+                <td>0.6 mi</td>
+              </tr>
+              <tr>
+                <th scope="row">Estimated CO2 Saved vs. Car Trip</th>
+                <td>0.4 kg</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            <!-- These figures will be calculated from real route and vehicle data once the backend is built in Phase 3. -->
+            Figures above are placeholder estimates for Phase 1 layout purposes.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <!--Empty for now also-->
+    </footer>
+  </body>
+</html>
