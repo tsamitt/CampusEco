@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Delivery Preferences</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+        <!--empty for now.-->
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Delivery Preferences</h2>
+
+        <a href="tracking.html">Back to Your Packages</a>
+
+        <section>
+          <h3>Update Your Preferences</h3>
+
+          <form action="/submit" method="post">
+            <fieldset>
+              <legend>Notify Me By</legend>
+              <label>
+                <input type="checkbox" name="notify" value="email" checked />
+                Email
+              </label>
+              <label>
+                <input type="checkbox" name="notify" value="text" />
+                Text Message
+              </label>
+            </fieldset>
+
+            <label for="delivery-window">Preferred Delivery Window</label>
+            <select id="delivery-window" name="delivery-window">
+              <option value="">No preference</option>
+              <option value="morning">Morning (8 AM &ndash; 11 AM)</option>
+              <option value="midday">Midday (11 AM &ndash; 2 PM)</option>
+              <option value="afternoon">Afternoon (2 PM &ndash; 5 PM)</option>
+            </select>
+
+            <label for="pref-building">Preferred Pickup Building</label>
+            <input
+              type="text"
+              id="pref-building"
+              name="pref-building"
+              pattern="^[A-Za-z]{2}$"
+              title="Please enter a two character building code."
+              placeholder="e.g. ML"
+            />
+
+            <fieldset>
+              <legend>If Locker Array Is Full</legend>
+              <label>
+                <input type="radio" name="fallback" value="hold" checked />
+                Hold at central hub
+              </label>
+              <label>
+                <input type="radio" name="fallback" value="nearest" />
+                Deliver to nearest available locker
+              </label>
+            </fieldset>
+
+            <label>
+              <input type="checkbox" name="signature-on-file" />
+              Keep my signature on file to skip manual confirmation for low-priority packages
+            </label>
+            <!-- Will only take effect once account storage is added in Phase 3. -->
+
+            <button type="submit">Save Preferences</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <!--Empty for now also-->
+    </footer>
+  </body>
+</html>
