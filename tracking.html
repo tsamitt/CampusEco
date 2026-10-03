@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,
+      initial-scale=1.0"
+    />
+    <title>Campus Eco Tracking</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <h1>Campus Eco</h1>
+        <!--empty for now.-->
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h2>Package Tracking</h2>
+
+        <section>
+          <h3>Find a Package</h3>
+
+          <form action="/submit" method="get">
+            <label for="track-barcode">Tracking Barcode</label>
+            <input
+              type="text"
+              id="track-barcode"
+              name="track-barcode"
+              placeholder="XXXX-XXXX-XXXX"
+              pattern="^\d{4}(?:-\d{4}){2}$"
+              title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
+            />
+            <button type="submit">Track Package</button>
+          </form>
+        </section>
+
+        <section>
+          <h3>Your Packages</h3>
+
+          <table>
+            <caption>
+              Packages addressed to you
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Tracking Barcode</th>
+                <th scope="col">Building</th>
+                <th scope="col">Locker Array</th>
+                <th scope="col">Status</th>
+                <th scope="col">Last Updated</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>1234-5678-9012</td>
+                <td>AH</td>
+                <td>Locker Array 1</td>
+                <td>Checked In</td>
+                <td>Oct 1, 9:14 AM</td>
+                <td>
+                  <a href="trackingDetail.html">View Details</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td>3141-5926-5358</td>
+                <td>FH</td>
+                <td>Locker Array 1</td>
+                <td>En Route</td>
+                <td>Oct 2, 11:40 AM</td>
+                <td>
+                  <a href="trackingDetail.html">View Details</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td>7777-8888-9999</td>
+                <td>CS</td>
+                <td>Locker Array 2</td>
+                <td>Delivered</td>
+                <td>Sep 29, 3:02 PM</td>
+                <td>
+                  <a href="trackingDetail.html">View Details</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>Your Campus Eco Impact</h3>
+
+          <table>
+            <caption>
+              Estimated impact of choosing electric cart delivery over individual car trips
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Deliveries Received</th>
+                <th scope="col">Estimated CO2 Saved</th>
+                <th scope="col">Equivalent Trees Planted</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>14</td>
+                <td>6.3 kg</td>
+                <td>0.3</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>
+            <!-- These figures will be calculated from real delivery data once the backend is built in Phase 3. -->
+            Figures above are placeholder estimates for Phase 1 layout purposes.
+          </p>
+        </section>
+
+        <div>
+          <a href="trackingPreferences.html">Manage Delivery Preferences</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <!--Empty for now also-->
+    </footer>
+  </body>
+</html>
