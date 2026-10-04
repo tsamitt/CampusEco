@@ -14,7 +14,7 @@ The system serves three distinct user types, each with their own dedicated porta
 
 | Portal | User | What they do |
 |---|---|---|
-| `operator.html` | **Central Hub Operators** | Check packages in: scan a tracking barcode, log weight and dimensions, assign a destination building and locker array, flag urgent shipments |
+| `operatorMain.html` | **Central Hub Operators** | Check packages in: scan a tracking barcode, log weight and dimensions, assign a destination building and locker array, flag urgent shipments |
 | `courier.html` | **Eco-Transit Crews** | View their route queue, claim deliveries, update transit milestones (Loaded → En Route → Delivered), report electric cart battery status |
 | `tracking.html` | **Students, Faculty & Staff** | Look up a package by tracking number, view live delivery status, electronically sign off on receipt, set delivery preferences, and see their carbon footprint impact |
 
@@ -23,21 +23,27 @@ The system serves three distinct user types, each with their own dedicated porta
 ```
 CampusEco/
 ├── README.md
-├── operator.html      Central Hub Operator portal
-├── courier.html       Eco-Transit Crew portal
-├── tracking.html       End-user tracking portal
+├── map.png                       Campus building reference map used in package check-in
+├── operatorMain.html             Central Hub Operator dashboard: package activity and urgent deliveries
+├── operatorPackageInput.html     Check in a new package
+├── courier.html                  Eco-Transit Crew dashboard: route queue and claimed deliveries
+├── courierRegister.html          Courier account registration
+├── courierUpdate.html            Claim or update a delivery's status
+├── tracking.html                 End-user dashboard: your packages and campus impact
+├── trackingdetail.html           Package details, delivery status, and receipt sign-off
+├── trackingpreferences.html      Notification and delivery preferences
 └── css/
-    └── styles.css      Shared stylesheet (design system, campus theme)
+    └── styles.css                Shared stylesheet (design system, campus theme)
 ```
 
 ## Team: Girlboss
 
 | Name | Portal Owned |
 |---|---|
-| Caleb Witthuhn | Operator Portal (`operator.html`) |
-| Braden Thooft | Courier Portal (`courier.html`) |
-| Sasmit Tomar | End-User Portal (`tracking.html`) |
-| Md Ashik Mollah | Design System & Styling |
+| Caleb Witthuhn | Operator Portal (`operatorMain.html`, `operatorPackageInput.html`) |
+| Braden Thooft | Courier Portal (`courier.html`, `courierRegister.html`, `courierUpdate.html`) |
+| Sasmit Tomar | End-User Portal (`tracking.html`, `trackingdetail.html`, `trackingpreferences.html`) |
+| Md Ashik Mollah | Design System & Styling (`css/styles.css`) |
 
 ## Project Phases
 
@@ -55,7 +61,7 @@ This project follows a strict linear waterfall: each phase must be fully complet
 These are static HTML pages for now; no build step required.
 
 1. Clone the repo
-2. Open any of the three portal pages in a browser, or use the VS Code **Live Server** extension for auto-refresh on save
+2. Open any portal's entry page (`operatorMain.html`, `courier.html`, or `tracking.html`) in a browser, or use the VS Code **Live Server** extension for auto-refresh on save
 
 ## Git Workflow
 
