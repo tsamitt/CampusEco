@@ -13,7 +13,11 @@
     <header>
       <nav>
         <h1>Campus Eco</h1>
-        <!--empty for now.-->
+        <ul>
+          <li><a href="operatorMain.html">Operators</a></li>
+          <li><a href="courier.html">Couriers</a></li>
+          <li><a href="tracking.html">Package Tracking</a></li>
+        </ul>
       </nav>
     </header>
     <main>
@@ -82,7 +86,7 @@
           <label>Delivery Priority</label>
 
           <label>
-            <input type="radio" name="priority" value="low" />
+            <input type="radio" name="priority" value="low" required />
             Low
           </label>
 
@@ -124,7 +128,11 @@
           </select>
 
           <label for="has-special-instructions">Has Special Instructions</label>
-          <input type="checkbox" />
+          <input
+            type="checkbox"
+            id="has-special-instructions"
+            name="has-special-instructions"
+          />
           <!--When doing JS, this text area should only showup if the checkbox is checked.-->
 
           <label for="instructions"> Instructions</label>
@@ -136,7 +144,8 @@
       </section>
     </main>
     <footer>
-      <!--Empty for now also-->
+      <p>&copy; 2026 Minnesota State University, Mankato</p>
+      <p>Campus Eco</p>
     </footer>
   </body>
 </html>
