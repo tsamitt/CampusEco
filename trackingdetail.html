@@ -14,11 +14,7 @@
     <header>
       <nav>
         <h1>Campus Eco</h1>
-        <ul>
-          <li><a href="operatorMain.html">Operators</a></li>
-          <li><a href="courier.html">Couriers</a></li>
-          <li><a href="tracking.html">Package Tracking</a></li>
-        </ul>
+        <!--empty for now.-->
       </nav>
     </header>
 
@@ -63,6 +59,36 @@
               </tr>
             </tbody>
           </table>
+        </section>
+
+        <section>
+          <h3>Real-Time Location Tracking</h3>
+
+          <table>
+            <caption>
+              Current tracked location
+            </caption>
+
+            <tbody>
+              <tr>
+                <th scope="row">Current Tracked Location</th>
+                <td>Electric Cart 4, Ellis Avenue (North) near Memorial Library</td>
+              </tr>
+              <tr>
+                <th scope="row">Nearest Building</th>
+                <td>ML, Memorial Library</td>
+              </tr>
+              <tr>
+                <th scope="row">Last Updated</th>
+                <td>Oct 2, 11:52 AM</td>
+              </tr>
+              <tr>
+                <th scope="row">Destination</th>
+                <td>FH, Ford Hall</td>
+              </tr>
+            </tbody>
+          </table>
+          <!-- Phase 1 is static. In Phase 2/3 this panel will refresh automatically (JS/AJAX) with the cart's live position. -->
         </section>
 
         <section>
@@ -135,21 +161,12 @@
             </fieldset>
 
             <label>
-              <input
-                type="checkbox"
-                id="confirm-receipt"
-                name="confirm-receipt"
-                required
-              />
+              <input type="checkbox" id="confirm-receipt" name="confirm-receipt" required />
               I confirm I received this package *
             </label>
 
             <label for="receipt-notes">Notes (optional)</label>
-            <textarea
-              name="receipt-notes"
-              id="receipt-notes"
-              rows="3"
-            ></textarea>
+            <textarea name="receipt-notes" id="receipt-notes" rows="3"></textarea>
 
             <button type="submit">Sign and Confirm Receipt</button>
           </form>
@@ -160,8 +177,7 @@
 
           <table>
             <caption>
-              Estimated environmental impact of delivering this package by
-              electric cart
+              Estimated environmental impact of delivering this package by electric cart
             </caption>
 
             <tbody>
@@ -185,8 +201,7 @@
     </main>
 
     <footer>
-      <p>&copy; 2026 Minnesota State University, Mankato</p>
-      <p>Campus Eco</p>
+      <!--Empty for now also-->
     </footer>
   </body>
 </html>
