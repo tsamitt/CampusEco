@@ -134,12 +134,12 @@
             id="has-special-instructions"
             name="has-special-instructions"
           />
-          <!--When doing JS, this text area should only showup if the checkbox is checked.-->
+          <div id="instructions-container">
+            <label for="instructions"> Instructions</label>
 
-          <label for="instructions"> Instructions</label>
-
-          <textarea name="instructions" id="instructions" rows="5"></textarea>
-
+            <textarea name="instructions" id="instructions" rows="5"></textarea>
+          </div>
+          <br>
           <button type="submit">Check Package In</button>
         </form>
       </section>
@@ -149,4 +149,5 @@
       <p>Campus Eco</p>
     </footer>
   </body>
+  <script src="operatorPackageInput.js"></script>
 </html>
