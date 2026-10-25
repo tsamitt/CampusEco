@@ -12,6 +12,9 @@ const confirmActionButton = $("#confirm-action-button");
 const dismissActionButton = $("#dismiss-action-button");
 const modalInstructionsCheckbox = $("#modal-has-special-instructions");
 const modalInstructionsContainer = $("#modal-instructions-container");
+const buildingFilter = $("#package-building-filter");
+const statusFilter = $("#package-status-filter");
+const clearFiltersButton = $("#clear-package-filters");
 
 let pendingAction = null;
 
@@ -44,7 +47,11 @@ function createCell(value) {
 
 function renderPackageTable() {
   const packages = CampusEco.PackageStore.all();
+
   const searchValue = searchInput.val().trim().toLowerCase();
+  const buildingValue = buildingFilter.val().trim().toUpperCase();
+
+  const statusValue = statusFilter.val().trim().toLowerCase();
 
   packageTableBody.empty();
 
@@ -55,16 +62,20 @@ function renderPackageTable() {
       return;
     }
 
+    if (buildingValue && String(pkg.building).toUpperCase() !== buildingValue) {
+      return;
+    }
+
+    if (statusValue && String(pkg.status).toLowerCase() !== statusValue) {
+      return;
+    }
+
     matchingPackages++;
 
     const row = $("<tr>");
 
     row.append(createCell(pkg.barcode));
-    row.append(
-      createCell(
-        CampusEco.BUILDINGS[pkg.building] ? pkg.building : pkg.building,
-      ),
-    );
+    row.append(createCell(pkg.building));
     row.append(createCell(pkg.locker));
     row.append(
       createCell(`${pkg.lengthIn} x ${pkg.widthIn} x ${pkg.heightIn} ″`),
@@ -72,6 +83,7 @@ function renderPackageTable() {
     row.append(createCell(`${pkg.weightLb} lb`));
     row.append($("<td>").append(priorityBadge(pkg.priority)));
     row.append($("<td>").append(statusBadge(pkg.status)));
+
     const actionsCell = $("<td>");
 
     ["View", "Edit", "Cancel"].forEach(function (action) {
@@ -124,8 +136,29 @@ function renderDashboard() {
   renderUrgentTable();
 }
 
+const toggleFiltersButton = $("#toggle-package-filters");
+
+toggleFiltersButton.on("click", function () {
+  const isExpanded = $(this).attr("aria-expanded") === "true";
+
+  $("#package-search-form").stop(true, true).slideToggle(250);
+
+  $(this)
+    .attr("aria-expanded", String(!isExpanded))
+    //looked it up and these &#9662 &#9652 are the way to get the up and down symbols in html.
+    .html(isExpanded ? "Filter Packages &#9662;" : "Hide Filters &#9652;");
+});
+
 searchForm.on("submit", function (event) {
   event.preventDefault();
+  renderPackageTable();
+});
+
+clearFiltersButton.on("click", function () {
+  searchInput.val("");
+  buildingFilter.val("");
+  statusFilter.val("");
+
   renderPackageTable();
 });
 

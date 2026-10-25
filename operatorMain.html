@@ -155,22 +155,60 @@
 
           <a href="operatorPackageInput.html">Check In New Package</a>
 
-          <form id="package-search-form">
-            <label for="package-search"
-              >Search Packages By Tracking Barcode</label
+          <div class="package-filter-section">
+            <button
+              type="button"
+              id="toggle-package-filters"
+              aria-expanded="false"
+              aria-controls="package-search-form"
             >
-            <input
-              type="search"
-              id="package-search"
-              name="package-search"
-              placeholder="XXXX-XXXX-XXXX"
-              pattern="^\d{4}(?:-\d{4}){2}$"
-              title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
-            />
-            <button type="submit">Search</button>
+              Filter Packages &#9662;
+            </button>
 
-            <p id="search-message" hidden>placeholder for rendering</p>
-          </form>
+            <form id="package-search-form" hidden>
+              <label for="package-search">Tracking Barcode</label>
+              <input
+                type="search"
+                id="package-search"
+                name="package-search"
+                placeholder="XXXX-XXXX-XXXX"
+                pattern="^\d{4}(?:-\d{4}){2}$"
+                title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
+              />
+
+              <label for="package-building-filter">Building</label>
+              <input
+                type="text"
+                id="package-building-filter"
+                name="building"
+                pattern="[A-Za-z]{2}"
+                maxlength="2"
+                title="Please enter a valid two-letter campus building code."
+                placeholder="e.g. AH"
+              />
+
+              <label for="package-status-filter">Status</label>
+              <select id="package-status-filter" name="status">
+                <option value="">All Statuses</option>
+                <option value="Checked In">Checked In</option>
+                <option value="Awaiting Pickup">Awaiting Pickup</option>
+                <option value="Claimed">Claimed</option>
+                <option value="Loaded">Loaded</option>
+                <option value="En Route">En Route</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+
+              <div class="filter-actions">
+                <button type="submit">Search</button>
+                <button type="button" id="clear-package-filters">
+                  Clear Filters
+                </button>
+              </div>
+
+              <p id="search-message" hidden>No matching packages found.</p>
+            </form>
+          </div>
 
           <table id="package-activity-table">
             <caption>

@@ -51,5 +51,46 @@
 }
 
 tr[data-group="delivered"] {
-  color: #888;
+  color: #818080;
+}
+
+.package-filter-section {
+  margin: 1rem 0;
+}
+
+#toggle-package-filters {
+  margin-bottom: 0.5rem;
+}
+
+#package-search-form {
+  padding: 1rem;
+  border: 1px solid #d3cdcd;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+#package-search-form label {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+#package-search-form input,
+#package-search-form select {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.25rem;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#toggle-package-filters {
+  font: inherit;
+  font-size: inherit;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
 }
