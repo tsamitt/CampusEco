@@ -248,6 +248,7 @@
       this.routeIndex = data.routeIndex || 0;
       this.lastLocationAt = data.lastLocationAt || null;
       this.cart = new Vehicle(data.cart);
+      this.specialInstructions = data.specialInstructions || "";
       this.receipt = data.receipt || null;
     }
 
@@ -259,6 +260,10 @@
       return typeof s === "number" ? s : 0;
     }
     get group() {
+      if (this.status === "Cancelled") {
+        return "cancelled";
+      }
+
       return this.status === "Delivered" ? "delivered" : "active";
     }
     get route() {
@@ -373,6 +378,7 @@
         routeIndex: this.routeIndex,
         lastLocationAt: this.lastLocationAt,
         cart: this.cart.toJSON(),
+        specialInstructions: this.specialInstructions,
         receipt: this.receipt,
       };
     }
@@ -553,6 +559,22 @@
   }
 
   const PackageStore = {
+    add: function (pkg) {
+      const list = this.all();
+
+      const duplicate = list.some(function (existing) {
+        return existing.barcode === pkg.barcode;
+      });
+
+      if (duplicate) {
+        return false;
+      }
+
+      list.push(pkg);
+      storage.set(STORAGE.packages, JSON.stringify(list));
+
+      return true;
+    },
     // Reads every package from localStorage (seeding on first use).
     all: function () {
       const raw = storage.get(STORAGE.packages);

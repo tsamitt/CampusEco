@@ -35,6 +35,9 @@
             pattern="^\d{4}(?:-\d{4}){2}$"
             title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
           />
+          <p id="barcode-error" class="feedback error" role="alert" hidden>
+            Placeholder.
+          </p>
 
           <label for="length">Package Length</label>
           <input
@@ -111,7 +114,14 @@
             title="Please enter in a two character building code."
             required
           />
-
+          <p
+            id="building-code-error"
+            class="feedback error"
+            role="alert"
+            hidden
+          >
+            Please enter a valid campus building code.
+          </p>
           <img
             src="map.png"
             alt="Image map of the university."
@@ -139,7 +149,7 @@
 
             <textarea name="instructions" id="instructions" rows="5"></textarea>
           </div>
-          <br>
+          <br />
           <button type="submit">Check Package In</button>
         </form>
       </section>
@@ -149,5 +159,6 @@
       <p>Campus Eco</p>
     </footer>
   </body>
+  <script src="js/Models.js"></script>
   <script src="operatorPackageInput.js"></script>
 </html>

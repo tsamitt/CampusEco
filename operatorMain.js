@@ -6,7 +6,12 @@ const urgentTableBody = document.getElementById("urgent-table-body");
 const searchForm = document.getElementById("package-search-form");
 const searchInput = document.getElementById("package-search");
 const searchMessage = document.getElementById("search-message");
+const actionBanner = document.getElementById("action-banner");
+const actionBannerMessage = document.getElementById("action-banner-message");
+const confirmActionButton = document.getElementById("confirm-action-button");
+const dismissActionButton = document.getElementById("dismiss-action-button");
 
+let pendingAction = null;
 function formatPriority(priority) {
   const value = String(priority || "");
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
@@ -78,7 +83,9 @@ function renderUrgentTable() {
 
   packages
     .filter(function (pkg) {
-      return pkg.priority.toLowerCase() === "urgent";
+      return (
+        pkg.priority.toLowerCase() === "urgent" && pkg.status !== "Cancelled"
+      );
     })
     .forEach(function (pkg) {
       const row = document.createElement("tr");
@@ -103,3 +110,64 @@ searchForm.addEventListener("submit", function (event) {
 });
 
 renderDashboard();
+packageTableBody.addEventListener("click", function (event) {
+  const button = event.target.closest("button[data-action]");
+
+  if (!button || !packageTableBody.contains(button)) {
+    return;
+  }
+
+  if (button.dataset.action !== "cancel") {
+    return;
+  }
+
+  const barcode = button.dataset.barcode;
+
+  showActionBanner({
+    message: `Are you sure you want to cancel package ${barcode}?`,
+    confirmText: "Confirm Cancellation",
+
+    onConfirm: function () {
+      const pkg = CampusEco.PackageStore.find(barcode);
+
+      if (!pkg || pkg.status === "Delivered" || pkg.status === "Cancelled") {
+        renderDashboard();
+        return;
+      }
+
+      pkg.setStatus("Cancelled");
+      CampusEco.PackageStore.save(pkg);
+
+      renderDashboard();
+    },
+  });
+});
+function showActionBanner({ message, confirmText, onConfirm }) {
+  pendingAction = onConfirm;
+
+  actionBannerMessage.textContent = message;
+  confirmActionButton.textContent = confirmText || "Confirm";
+
+  actionBanner.hidden = false;
+  confirmActionButton.focus();
+}
+
+function hideActionBanner() {
+  pendingAction = null;
+  actionBanner.hidden = true;
+}
+
+confirmActionButton.addEventListener("click", function () {
+  if (!pendingAction) {
+    return;
+  }
+
+  const action = pendingAction;
+
+  hideActionBanner();
+  action();
+});
+
+dismissActionButton.addEventListener("click", function () {
+  hideActionBanner();
+});

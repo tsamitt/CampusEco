@@ -26,6 +26,30 @@ nav h1 {
   margin: 0;
 }
 
+.action-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
+}
+
+.action-banner p {
+  margin-top: 0;
+}
+
+.action-banner button {
+  margin-right: 0.5rem;
+}
+
+.action-banner[hidden] {
+  display: none;
+}
+
 nav ul {
   list-style: none;
   display: flex;
