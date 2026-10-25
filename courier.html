@@ -2,13 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,
-      initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Campus Eco Couriers</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/courier.css" />
   </head>
 
   <body>
@@ -27,6 +24,12 @@
       <section>
         <h2>Couriers</h2>
 
+        <!-- Filled in by JS: "Signed in as ..." or a prompt to register -->
+        <p id="courier-greeting" class="courier-greeting"></p>
+
+        <!-- Feedback messages (claim, status updates, etc.) -->
+        <div id="courier-message" class="form-message" role="status" aria-live="polite" hidden></div>
+
         <section>
           <h3>Delivery Activity</h3>
 
@@ -38,9 +41,27 @@
             <a href="courierRegister.html">Courier Registration</a>
           </div>
 
-          <table>
+          <!-- Toolbar: search, priority filter, and the cart used for dashboard claims -->
+          <div class="courier-toolbar">
+            <label for="queue-search">Search queue</label>
+            <input type="search" id="queue-search" placeholder="Barcode or building (press / to focus)" />
+
+            <label for="queue-priority">Priority</label>
+            <select id="queue-priority">
+              <option value="all">All</option>
+              <option value="Urgent">Urgent</option>
+              <option value="Standard">Standard</option>
+              <option value="Low">Low</option>
+            </select>
+
+            <label for="claim-cart-quick">Claim using</label>
+            <select id="claim-cart-quick"></select>
+          </div>
+
+          <table id="queue-table">
             <caption>
               Route queue: deliveries waiting to be claimed
+              (<span id="queue-count">0</span>)
             </caption>
 
             <thead>
@@ -56,57 +77,21 @@
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>1111-2222-3333</td>
-                <td>CS</td>
-                <td>Locker Array 2</td>
-                <td>15.2 lb</td>
-                <td>Urgent</td>
-                <td>Awaiting Pickup</td>
-                <td>
-                  <button type="button">Claim</button>
-                </td>
-              </tr>
-
-              <tr>
-                <td>2</td>
-                <td>1234-5678-9012</td>
-                <td>AH</td>
-                <td>Locker Array 1</td>
-                <td>8.5 lb</td>
-                <td>Standard</td>
-                <td>Checked In</td>
-                <td>
-                  <button type="button">Claim</button>
-                </td>
-              </tr>
-
-              <tr>
-                <td>3</td>
-                <td>3333-4444-5555</td>
-                <td>AH</td>
-                <td>Locker Array 3</td>
-                <td>4.7 lb</td>
-                <td>Low</td>
-                <td>Checked In</td>
-                <td>
-                  <button type="button">Claim</button>
-                </td>
-              </tr>
-            </tbody>
+            <!-- Rows are injected by courier.js -->
+            <tbody id="queue-body"></tbody>
           </table>
         </section>
 
         <section>
           <h3>My Deliveries</h3>
 
-          <table>
+          <label class="courier-inline">
+            <input type="checkbox" id="hide-delivered" /> Hide delivered packages
+          </label>
+
+          <table id="my-table">
             <caption>
-              <div>
-                <strong>Deliveries you have claimed </strong>
-              </div>
+              Deliveries you have claimed (<span id="my-count">0</span>)
             </caption>
 
             <thead>
@@ -120,38 +105,73 @@
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>3141-5926-5358</td>
-                <td>FH</td>
-                <td>Locker Array 1</td>
-                <td>Urgent</td>
-                <td>Loaded</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Update Status</button>
-                </td>
-              </tr>
-              <tr>
-                <td>7777-8888-9999</td>
-                <td>CS</td>
-                <td>Locker Array 2</td>
-                <td>Standard</td>
-                <td>En Route</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Update Status</button>
-                </td>
-              </tr>
-            </tbody>
+            <!-- Rows are injected by courier.js -->
+            <tbody id="my-body"></tbody>
           </table>
         </section>
+
+        <section>
+          <h3>Cart Route Map</h3>
+          <p>
+            Pins show your active deliveries. Press <strong>Start Route</strong>
+            to drive the cart from the Central Hub to each stop and back.
+          </p>
+
+          <div class="courier-map-controls">
+            <button type="button" id="start-route">Start Route</button>
+            <button type="button" id="reset-route">Return to Hub</button>
+            <span id="route-status" aria-live="polite"></span>
+          </div>
+
+          <div id="courier-map" class="courier-map">
+            <div id="map-hub" class="map-hub" title="Central Hub">HUB</div>
+            <div id="courier-cart" class="cart-marker" title="Your cart">&#128667;</div>
+          </div>
+        </section>
+
+        <section>
+          <h3>Cart Battery Status</h3>
+          <div id="battery-list" class="battery-list"></div>
+          <a href="courierUpdate.html#battery-form">Report Battery Status</a>
+        </section>
+
+        <p>
+          <!-- Not "reset-demo": Common.js already uses that id for the tracking pages -->
+          <button type="button" id="courier-reset" class="secondary-button">Reset demo data</button>
+        </p>
       </section>
     </main>
+
+    <!-- Slide-out panel for updating a delivery's status (opened by "Update Status") -->
+    <aside id="status-panel" class="status-panel" aria-hidden="true">
+      <button type="button" id="close-panel" class="close-panel" aria-label="Close panel">&times;</button>
+      <h3>Update Status</h3>
+      <p>Package <strong id="panel-barcode"></strong></p>
+      <p>Current status: <span id="panel-current"></span></p>
+
+      <form id="panel-form">
+        <fieldset>
+          <legend>New Status *</legend>
+          <div id="panel-options"></div>
+        </fieldset>
+
+        <label for="panel-notes">Notes?</label>
+        <textarea id="panel-notes" rows="3" maxlength="250"></textarea>
+
+        <button type="submit">Save Status</button>
+      </form>
+    </aside>
 
     <footer>
       <p>&copy; 2026 Minnesota State University, Mankato</p>
       <p>Campus Eco</p>
     </footer>
+
+    <!-- Same load order as the other portals: jQuery, shared models, shared UI, then courier files -->
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/Models.js"></script>
+    <script src="js/Common.js"></script>
+    <script src="js/courierModels.js"></script>
+    <script src="js/courier.js"></script>
   </body>
 </html>
