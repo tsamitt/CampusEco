@@ -1,77 +1,77 @@
-const hasSpecialInstructionsCheckbox = document.getElementById(
-  "has-special-instructions",
-);
-const barcodeError = document.getElementById("barcode-error");
-const buildingError = document.getElementById("building-code-error");
 
-const instructionsContainer = document.getElementById("instructions-container");
+"use strict";
+
+const hasSpecialInstructionsCheckbox = $("#has-special-instructions");
+const barcodeError = $("#barcode-error");
+const buildingError = $("#building-code-error");
+
+const instructionsContainer = $("#instructions-container");
 
 function updateInstructionsVisibility() {
-  instructionsContainer.hidden = !hasSpecialInstructionsCheckbox.checked;
+  instructionsContainer.prop(
+    "hidden",
+    !hasSpecialInstructionsCheckbox.is(":checked"),
+  );
 }
 
-hasSpecialInstructionsCheckbox.addEventListener(
+hasSpecialInstructionsCheckbox.on(
   "change",
   updateInstructionsVisibility,
 );
 
 updateInstructionsVisibility();
 
-("use strict");
+const packageForm = $("main form");
 
-const packageForm = document.querySelector("main form");
+const barcodeInput = $("#barcode");
+const lengthInput = $("#length");
+const widthInput = $("#width");
+const heightInput = $("#height");
+const weightInput = $("#weight");
+const buildingInput = $("#building-code");
+const lockerInput = $("#locker");
+const instructionsCheckbox = $("#has-special-instructions");
+const instructionsInput = $("#instructions");
 
-const barcodeInput = document.getElementById("barcode");
-const lengthInput = document.getElementById("length");
-const widthInput = document.getElementById("width");
-const heightInput = document.getElementById("height");
-const weightInput = document.getElementById("weight");
-const buildingInput = document.getElementById("building-code");
-const lockerInput = document.getElementById("locker");
-const instructionsCheckbox = document.getElementById(
-  "has-special-instructions",
-);
-const instructionsInput = document.getElementById("instructions");
-
-packageForm.addEventListener("submit", function (event) {
+packageForm.on("submit", function (event) {
   event.preventDefault();
 
-  if (!packageForm.reportValidity()) {
+  if (!this.reportValidity()) {
     return;
   }
 
-  const barcode = barcodeInput.value.trim();
-  const building = buildingInput.value.trim().toUpperCase();
+  const barcode = barcodeInput.val().trim();
+  const building = buildingInput.val().trim().toUpperCase();
 
-  const selectedPriority = packageForm.querySelector(
+  const selectedPriority = packageForm.find(
     'input[name="priority"]:checked',
   );
 
-  const specialInstructions = instructionsCheckbox.checked
-    ? instructionsInput.value.trim()
+  const specialInstructions = instructionsCheckbox.is(":checked")
+    ? instructionsInput.val().trim()
     : "";
 
   if (!CampusEco.BUILDINGS[building]) {
-    buildingError.textContent = "Please enter a valid campus building code.";
-    buildingError.hidden = false;
+    buildingError.text("Please enter a valid campus building code.");
+    buildingError.prop("hidden", false);
 
-    buildingInput.focus();
+    buildingInput.trigger("focus");
     return;
   }
 
-  buildingError.hidden = true;
+  buildingError.prop("hidden", true);
 
   const newPackage = new CampusEco.Package({
     barcode: barcode,
     building: building,
-    locker: lockerInput.options[lockerInput.selectedIndex].text,
-    lengthIn: Number(lengthInput.value),
-    widthIn: Number(widthInput.value),
-    heightIn: Number(heightInput.value),
-    weightLb: Number(weightInput.value),
+    locker: lockerInput.find("option:selected").text(),
+    lengthIn: Number(lengthInput.val()),
+    widthIn: Number(widthInput.val()),
+    heightIn: Number(heightInput.val()),
+    weightLb: Number(weightInput.val()),
     priority:
-      selectedPriority.value.charAt(0).toUpperCase() +
-      selectedPriority.value.slice(1).toLowerCase(),
+      selectedPriority.val().charAt(0).toUpperCase() +
+      selectedPriority.val().slice(1).toLowerCase(),
     status: "Checked In",
     mine: true,
     history: [
@@ -87,14 +87,15 @@ packageForm.addEventListener("submit", function (event) {
   const saved = CampusEco.PackageStore.add(newPackage);
 
   if (!saved) {
-    barcodeError.textContent =
-      "A package with this tracking barcode already exists.";
-    barcodeError.hidden = false;
+    barcodeError.text(
+      "A package with this tracking barcode already exists.",
+    );
+    barcodeError.prop("hidden", false);
 
-    barcodeInput.focus();
+    barcodeInput.trigger("focus");
     return;
   }
-    barcodeError.hidden = true;
-  // Return to the operator dashboard after successful check-in.
+
+  barcodeError.prop("hidden", true);
   window.location.href = "operatorMain.html";
 });

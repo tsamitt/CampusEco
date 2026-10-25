@@ -1,20 +1,21 @@
+
 "use strict";
 
-const packageTableBody = document.getElementById("package-table-body");
-const urgentTableBody = document.getElementById("urgent-table-body");
+const packageTableBody = $("#package-table-body");
+const urgentTableBody = $("#urgent-table-body");
 
-const searchForm = document.getElementById("package-search-form");
-const searchInput = document.getElementById("package-search");
-const searchMessage = document.getElementById("search-message");
-const actionBanner = document.getElementById("action-banner");
-const actionBannerMessage = document.getElementById("action-banner-message");
-const confirmActionButton = document.getElementById("confirm-action-button");
-const dismissActionButton = document.getElementById("dismiss-action-button");
-const modalInstructionsCheckbox = document.getElementById(
-  "modal-has-special-instructions",
+const searchForm = $("#package-search-form");
+const searchInput = $("#package-search");
+const searchMessage = $("#search-message");
+const actionBanner = $("#action-banner");
+const actionBannerMessage = $("#action-banner-message");
+const confirmActionButton = $("#confirm-action-button");
+const dismissActionButton = $("#dismiss-action-button");
+const modalInstructionsCheckbox = $(
+  "#modal-has-special-instructions",
 );
-const modalInstructionsContainer = document.getElementById(
-  "modal-instructions-container",
+const modalInstructionsContainer = $(
+  "#modal-instructions-container",
 );
 
 let pendingAction = null;
@@ -24,16 +25,14 @@ function formatPriority(priority) {
 }
 
 function createCell(value) {
-  const cell = document.createElement("td");
-  cell.textContent = value ?? "";
-  return cell;
+  return $("<td>").text(value ?? "");
 }
 
 function renderPackageTable() {
   const packages = CampusEco.PackageStore.all();
-  const searchValue = searchInput.value.trim().toLowerCase();
+  const searchValue = searchInput.val().trim().toLowerCase();
 
-  packageTableBody.replaceChildren();
+  packageTableBody.empty();
 
   let matchingPackages = 0;
 
@@ -44,64 +43,67 @@ function renderPackageTable() {
 
     matchingPackages++;
 
-    const row = document.createElement("tr");
+    const row = $("<tr>");
 
-    row.appendChild(createCell(pkg.barcode));
-    row.appendChild(
+    row.append(createCell(pkg.barcode));
+    row.append(
       createCell(
         CampusEco.BUILDINGS[pkg.building] ? pkg.building : pkg.building,
       ),
     );
-    row.appendChild(createCell(pkg.locker));
-    row.appendChild(
+    row.append(createCell(pkg.locker));
+    row.append(
       createCell(`${pkg.lengthIn} x ${pkg.widthIn} x ${pkg.heightIn} ″`),
     );
-    row.appendChild(createCell(`${pkg.weightLb} lb`));
-    row.appendChild(createCell(formatPriority(pkg.priority)));
-    row.appendChild(createCell(pkg.status));
+    row.append(createCell(`${pkg.weightLb} lb`));
+    row.append(createCell(formatPriority(pkg.priority)));
+    row.append(createCell(pkg.status));
 
-    const actionsCell = document.createElement("td");
+    const actionsCell = $("<td>");
 
     ["View", "Edit", "Cancel"].forEach(function (action) {
-      const button = document.createElement("button");
+      const button = $("<button>", {
+        type: "button",
+        text: action,
+      });
 
-      button.type = "button";
-      button.textContent = action;
-      button.dataset.action = action.toLowerCase();
-      button.dataset.barcode = pkg.barcode;
+      button.attr("data-action", action.toLowerCase());
+      button.attr("data-barcode", pkg.barcode);
 
-      actionsCell.appendChild(button);
-      actionsCell.appendChild(document.createTextNode(" "));
+      actionsCell.append(button);
+      actionsCell.append(" ");
     });
 
-    row.appendChild(actionsCell);
-    packageTableBody.appendChild(row);
+    row.append(actionsCell);
+    packageTableBody.append(row);
   });
 
-  searchMessage.textContent = "No matching packages found.";
-  searchMessage.hidden = matchingPackages !== 0;
+  searchMessage
+    .text("No matching packages found.")
+    .prop("hidden", matchingPackages !== 0);
 }
 
 function renderUrgentTable() {
   const packages = CampusEco.PackageStore.all();
 
-  urgentTableBody.replaceChildren();
+  urgentTableBody.empty();
 
   packages
     .filter(function (pkg) {
       return (
-        pkg.priority.toLowerCase() === "urgent" && pkg.status !== "Cancelled"
+        pkg.priority.toLowerCase() === "urgent" &&
+        pkg.status !== "Cancelled"
       );
     })
     .forEach(function (pkg) {
-      const row = document.createElement("tr");
+      const row = $("<tr>");
 
-      row.appendChild(createCell(pkg.barcode));
-      row.appendChild(createCell(pkg.building));
-      row.appendChild(createCell(pkg.locker));
-      row.appendChild(createCell(pkg.status));
+      row.append(createCell(pkg.barcode));
+      row.append(createCell(pkg.building));
+      row.append(createCell(pkg.locker));
+      row.append(createCell(pkg.status));
 
-      urgentTableBody.appendChild(row);
+      urgentTableBody.append(row);
     });
 }
 
@@ -110,31 +112,31 @@ function renderDashboard() {
   renderUrgentTable();
 }
 
-searchForm.addEventListener("submit", function (event) {
+searchForm.on("submit", function (event) {
   event.preventDefault();
   renderPackageTable();
 });
 
-const packageModal = document.getElementById("package-modal");
-const packageModalForm = document.getElementById("package-modal-form");
+const packageModal = $("#package-modal");
+const packageModalForm = $("#package-modal-form");
 
 const modalFields = {
-  barcode: document.getElementById("modal-barcode"),
-  building: document.getElementById("modal-building"),
-  locker: document.getElementById("modal-locker"),
-  length: document.getElementById("modal-length"),
-  width: document.getElementById("modal-width"),
-  height: document.getElementById("modal-height"),
-  weight: document.getElementById("modal-weight"),
-  priority: document.getElementById("modal-priority"),
-  status: document.getElementById("modal-status"),
-  instructions: document.getElementById("modal-instructions"),
+  barcode: $("#modal-barcode"),
+  building: $("#modal-building"),
+  locker: $("#modal-locker"),
+  length: $("#modal-length"),
+  width: $("#modal-width"),
+  height: $("#modal-height"),
+  weight: $("#modal-weight"),
+  priority: $("#modal-priority"),
+  status: $("#modal-status"),
+  instructions: $("#modal-instructions"),
 };
 
-const modalBuildingError = document.getElementById("modal-building-error");
-const packageModalError = document.getElementById("package-modal-error");
-const modalSaveButton = document.getElementById("modal-save-button");
-const modalCloseButton = document.getElementById("modal-close-button");
+const modalBuildingError = $("#modal-building-error");
+const packageModalError = $("#package-modal-error");
+const modalSaveButton = $("#modal-save-button");
+const modalCloseButton = $("#modal-close-button");
 
 let editingBarcode = null;
 let modalMode = "view";
@@ -149,70 +151,75 @@ function openPackageModal(barcode, mode) {
   editingBarcode = barcode;
   modalMode = mode;
 
-  modalFields.barcode.value = pkg.barcode;
-  modalFields.building.value = pkg.building;
-  modalFields.locker.value = pkg.locker;
-  modalFields.length.value = pkg.lengthIn;
-  modalFields.width.value = pkg.widthIn;
-  modalFields.height.value = pkg.heightIn;
-  modalFields.weight.value = pkg.weightLb;
-  modalFields.priority.value = pkg.priority;
-  modalFields.status.value = pkg.status;
-  modalFields.instructions.value = pkg.specialInstructions || "";
-  modalInstructionsCheckbox.checked = Boolean(
-    pkg.specialInstructions && pkg.specialInstructions.trim(),
+  modalFields.barcode.val(pkg.barcode);
+  modalFields.building.val(pkg.building);
+  modalFields.locker.val(pkg.locker);
+  modalFields.length.val(pkg.lengthIn);
+  modalFields.width.val(pkg.widthIn);
+  modalFields.height.val(pkg.heightIn);
+  modalFields.weight.val(pkg.weightLb);
+  modalFields.priority.val(pkg.priority);
+  modalFields.status.val(pkg.status);
+  modalFields.instructions.val(pkg.specialInstructions || "");
+
+  modalInstructionsCheckbox.prop(
+    "checked",
+    Boolean(pkg.specialInstructions && pkg.specialInstructions.trim()),
   );
 
-  modalInstructionsContainer.hidden = !modalInstructionsCheckbox.checked;
+  modalInstructionsContainer.prop(
+    "hidden",
+    !modalInstructionsCheckbox.is(":checked"),
+  );
 
   const isReadOnly = mode === "view";
 
   Object.keys(modalFields).forEach(function (key) {
     if (key !== "barcode" && key !== "status") {
-      modalFields[key].disabled = isReadOnly;
+      modalFields[key].prop("disabled", isReadOnly);
     }
   });
-  modalInstructionsCheckbox.disabled = isReadOnly;
 
-  modalSaveButton.hidden = isReadOnly;
-  packageModalError.hidden = true;
-  modalBuildingError.hidden = true;
+  modalInstructionsCheckbox.prop("disabled", isReadOnly);
 
-  document.getElementById("package-modal-title").textContent = isReadOnly
-    ? "View Package"
-    : "Edit Package";
+  modalSaveButton.prop("hidden", isReadOnly);
+  packageModalError.prop("hidden", true);
+  modalBuildingError.prop("hidden", true);
 
-  packageModal.showModal();
+  $("#package-modal-title").text(
+    isReadOnly ? "View Package" : "Edit Package",
+  );
+
+  packageModal[0].showModal();
 }
 
-modalInstructionsCheckbox.addEventListener("change", function () {
-  modalInstructionsContainer.hidden = !modalInstructionsCheckbox.checked;
+modalInstructionsCheckbox.on("change", function () {
+  modalInstructionsContainer.prop(
+    "hidden",
+    !modalInstructionsCheckbox.is(":checked"),
+  );
 
-  if (!modalInstructionsCheckbox.checked) {
-    modalFields.instructions.value = "";
+  if (!modalInstructionsCheckbox.is(":checked")) {
+    modalFields.instructions.val("");
   }
 });
+
 function closePackageModal() {
-  packageModal.close();
+  packageModal[0].close();
   editingBarcode = null;
   modalMode = "view";
-  packageModalForm.reset();
-  packageModalError.hidden = true;
-  modalBuildingError.hidden = true;
-  modalInstructionsCheckbox.checked = false;
-  modalInstructionsContainer.hidden = true;
-  modalFields.instructions.value = "";
+  packageModalForm[0].reset();
+  packageModalError.prop("hidden", true);
+  modalBuildingError.prop("hidden", true);
+  modalInstructionsCheckbox.prop("checked", false);
+  modalInstructionsContainer.prop("hidden", true);
+  modalFields.instructions.val("");
 }
 
-packageTableBody.addEventListener("click", function (event) {
-  const button = event.target.closest("button[data-action]");
-
-  if (!button || !packageTableBody.contains(button)) {
-    return;
-  }
-
-  const action = button.dataset.action;
-  const barcode = button.dataset.barcode;
+packageTableBody.on("click", "button[data-action]", function () {
+  const button = $(this);
+  const action = button.attr("data-action");
+  const barcode = button.attr("data-barcode");
 
   if (action === "view") {
     openPackageModal(barcode, "view");
@@ -220,52 +227,54 @@ packageTableBody.addEventListener("click", function (event) {
     openPackageModal(barcode, "edit");
   }
 });
+// don't mess this up 
+modalCloseButton.on("click", closePackageModal);
 
-modalCloseButton.addEventListener("click", closePackageModal);
-
-packageModal.addEventListener("click", function (event) {
-  if (event.target === packageModal) {
+packageModal.on("click", function (event) {
+  if (event.target === this) {
     closePackageModal();
   }
 });
 
-packageModalForm.addEventListener("submit", function (event) {
+packageModalForm.on("submit", function (event) {
   event.preventDefault();
 
   if (modalMode !== "edit" || !editingBarcode) {
     return;
   }
 
-  if (!packageModalForm.reportValidity()) {
+  if (!this.reportValidity()) {
     return;
   }
 
-  const building = modalFields.building.value.trim().toUpperCase();
+  const building = modalFields.building.val().trim().toUpperCase();
 
   if (!CampusEco.BUILDINGS[building]) {
-    modalBuildingError.hidden = false;
-    modalFields.building.focus();
+    modalBuildingError.prop("hidden", false);
+    modalFields.building.trigger("focus");
     return;
   }
 
   const pkg = CampusEco.PackageStore.find(editingBarcode);
 
   if (!pkg) {
-    packageModalError.textContent =
-      "This package could not be found. Refresh the dashboard and try again.";
-    packageModalError.hidden = false;
+    packageModalError
+      .text(
+        "This package could not be found. Refresh the dashboard and try again.",
+      )
+      .prop("hidden", false);
     return;
   }
 
   pkg.building = building;
-  pkg.locker = modalFields.locker.value;
-  pkg.lengthIn = Number(modalFields.length.value);
-  pkg.widthIn = Number(modalFields.width.value);
-  pkg.heightIn = Number(modalFields.height.value);
-  pkg.weightLb = Number(modalFields.weight.value);
-  pkg.priority = modalFields.priority.value;
-  pkg.specialInstructions = modalInstructionsCheckbox.checked
-    ? modalFields.instructions.value.trim()
+  pkg.locker = modalFields.locker.val();
+  pkg.lengthIn = Number(modalFields.length.val());
+  pkg.widthIn = Number(modalFields.width.val());
+  pkg.heightIn = Number(modalFields.height.val());
+  pkg.weightLb = Number(modalFields.weight.val());
+  pkg.priority = modalFields.priority.val();
+  pkg.specialInstructions = modalInstructionsCheckbox.is(":checked")
+    ? modalFields.instructions.val().trim()
     : "";
 
   CampusEco.PackageStore.save(pkg);
@@ -275,18 +284,9 @@ packageModalForm.addEventListener("submit", function (event) {
 });
 
 renderDashboard();
-packageTableBody.addEventListener("click", function (event) {
-  const button = event.target.closest("button[data-action]");
 
-  if (!button || !packageTableBody.contains(button)) {
-    return;
-  }
-
-  if (button.dataset.action !== "cancel") {
-    return;
-  }
-
-  const barcode = button.dataset.barcode;
+packageTableBody.on("click", "button[data-action='cancel']", function () {
+  const barcode = $(this).attr("data-barcode");
 
   showActionBanner({
     message: `Are you sure you want to cancel package ${barcode}?`,
@@ -307,22 +307,23 @@ packageTableBody.addEventListener("click", function (event) {
     },
   });
 });
+
 function showActionBanner({ message, confirmText, onConfirm }) {
   pendingAction = onConfirm;
 
-  actionBannerMessage.textContent = message;
-  confirmActionButton.textContent = confirmText || "Confirm";
+  actionBannerMessage.text(message);
+  confirmActionButton.text(confirmText || "Confirm");
 
-  actionBanner.hidden = false;
-  confirmActionButton.focus();
+  actionBanner.prop("hidden", false);
+  confirmActionButton.trigger("focus");
 }
 
 function hideActionBanner() {
   pendingAction = null;
-  actionBanner.hidden = true;
+  actionBanner.prop("hidden", true);
 }
 
-confirmActionButton.addEventListener("click", function () {
+confirmActionButton.on("click", function () {
   if (!pendingAction) {
     return;
   }
@@ -333,6 +334,6 @@ confirmActionButton.addEventListener("click", function () {
   action();
 });
 
-dismissActionButton.addEventListener("click", function () {
+dismissActionButton.on("click", function () {
   hideActionBanner();
 });
