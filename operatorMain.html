@@ -32,18 +32,24 @@
 
           <a href="operatorPackageInput.html">Check In New Package</a>
 
-          <form>
-            <label for="package-search">Search Packages</label>
+          <form id="package-search-form">
+            <label for="package-search"
+              >Search Packages By Tracking Barcode</label
+            >
             <input
               type="search"
               id="package-search"
               name="package-search"
-              placeholder="Search by tracking barcode"
+              placeholder="XXXX-XXXX-XXXX"
+              pattern="^\d{4}(?:-\d{4}){2}$"
+              title="Barcode should be 12 digits with every 4 digits separated by a hyphen: XXXX-XXXX-XXXX"
             />
-            <button type="button">Search</button>
+            <button type="submit">Search</button>
+
+            <p id="search-message" hidden>placeholder for rendering</p>
           </form>
 
-          <table>
+          <table id="package-activity-table">
             <caption>
               Recently checked-in packages
             </caption>
@@ -165,5 +171,6 @@
       <p>&copy; 2026 Minnesota State University, Mankato</p>
       <p>Campus Eco</p>
     </footer>
+    <script src="operatorMain.js"></script>
   </body>
 </html>
