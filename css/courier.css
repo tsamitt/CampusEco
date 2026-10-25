@@ -1,0 +1,333 @@
+/* CampusEco - Courier Portal components (Phase 2 Deliverables)
+   Styles for elements created or animated by JavaScript.
+   Responsive/media-query rules live in the shared stylesheet. */
+
+/* Greeting + feedback message */
+.courier-greeting {
+  font-weight: bold;
+}
+
+.courier-greeting a {
+  padding: 4px 10px;
+  margin: 0;
+}
+
+/* Toolbar */
+.courier-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  background-color: white;
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.courier-toolbar label {
+  font-weight: bold;
+}
+
+.courier-toolbar input,
+.courier-toolbar select {
+  padding: 7px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+.courier-toolbar input[type="search"] {
+  min-width: 260px;
+}
+
+.courier-inline {
+  display: inline-block;
+  margin-top: 5px;
+}
+
+/* Priority and status badges
+   Status colours match .badge-* in tracking.css so a status looks the same in every portal. */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.priority-urgent {
+  background-color: #fbe4e4;
+  color: #9b1c1c;
+}
+
+.priority-standard {
+  background-color: #ece4f6;
+  color: #4f2683;
+}
+
+.priority-low {
+  background-color: #eee;
+  color: #555;
+}
+
+.badge-checked-in {
+  background: #e8e6ee;
+  color: #3b3846;
+}
+.badge-awaiting-pickup {
+  background: #fff0c2;
+  color: #5c4300;
+}
+.badge-claimed {
+  background: #ffe9c7;
+  color: #6b3d00;
+}
+.badge-loaded {
+  background: #dce9fb;
+  color: #0f3c78;
+}
+.badge-en-route {
+  background: #e6dcf5;
+  color: #3a2264;
+}
+.badge-delivered {
+  background: #d9f0e1;
+  color: #0d4d29;
+}
+.badge-cancelled {
+  background: #f1f1f1;
+  color: #666;
+}
+
+tr[data-group="delivered"] {
+  color: #888;
+}
+
+/* Row highlight after a claim/update */
+@keyframes courier-flash {
+  from {
+    background-color: #ffe98a;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+tr.flash td {
+  animation: courier-flash 1.6s ease-out;
+}
+
+/* Details row (View button) */
+.details-row td {
+  background-color: #faf8fd;
+}
+
+.details-box p {
+  margin-top: 0;
+}
+
+.timeline {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.secondary-button {
+  background-color: #777;
+}
+
+/* Slide-out status panel */
+.status-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 340px;
+  max-width: 90vw;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 25px;
+  background-color: white;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.status-panel h3 {
+  color: #4f2683;
+  margin-top: 0;
+}
+
+.status-panel form {
+  padding: 0;
+  margin: 0;
+}
+
+.status-panel fieldset label {
+  display: block;
+  font-weight: normal;
+  margin: 6px 0;
+}
+
+.status-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.close-panel {
+  float: right;
+  font-size: 22px;
+  line-height: 1;
+  padding: 2px 10px;
+}
+
+/* Cart route map */
+.courier-map-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.courier-map {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 1532 / 717;
+  background: url("../map.png") no-repeat center / 100% 100%;
+  border: 2px solid #4f2683;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.map-pin,
+.map-hub,
+.cart-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.map-pin {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 50%;
+  background-color: #d33;
+  color: white;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.map-pin.visited {
+  background-color: #2e9e45;
+}
+
+.map-hub {
+  padding: 3px 6px;
+  background-color: #4f2683;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.cart-marker {
+  font-size: 28px;
+  z-index: 5;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Battery cards */
+.battery-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.battery-card {
+  flex: 1 1 180px;
+  background-color: white;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border-top: 5px solid #2e9e45;
+}
+
+.battery-card.battery-low {
+  border-top-color: #e0a100;
+}
+
+.battery-card.battery-critical {
+  border-top-color: #d33;
+}
+
+.battery-bar {
+  height: 12px;
+  background-color: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.battery-fill {
+  height: 100%;
+  background-color: #2e9e45;
+}
+
+.battery-low .battery-fill {
+  background-color: #e0a100;
+}
+
+.battery-critical .battery-fill {
+  background-color: #d33;
+}
+
+/* Form helpers used on update/register pages */
+.form-message {
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+.form-message.is-success {
+  background-color: #e3f4e6;
+  color: #1d6b2c;
+}
+
+.form-message.is-error {
+  background-color: #fbe4e4;
+  color: #9b1c1c;
+}
+
+.form-message[hidden] {
+  display: none;
+}
+
+.field-hint {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+.is-near-limit,
+.is-error-text {
+  color: #d33;
+}
+
+.strength-meter {
+  height: 8px;
+  width: 300px;
+  max-width: 100%;
+  background-color: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  background-color: #d33;
+}
