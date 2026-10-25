@@ -1,3 +1,5 @@
+"use strict";
+
 const packageTableBody = document.getElementById("package-table-body");
 const urgentTableBody = document.getElementById("urgent-table-body");
 
@@ -5,67 +7,19 @@ const searchForm = document.getElementById("package-search-form");
 const searchInput = document.getElementById("package-search");
 const searchMessage = document.getElementById("search-message");
 
-function initializePackages() {
-  if (localStorage.getItem(STORAGE_KEY) === null) {
-    const samplePackages = [
-      new Package({
-        barcode: "1234-5678-9012",
-        length: 12,
-        width: 10,
-        height: 8,
-        weight: 8.5,
-        building: "AH",
-        locker: "locker-a",
-        priority: "standard",
-        status: "Checked In",
-      }),
-      new Package({
-        barcode: "1111-2222-3333",
-        length: 18,
-        width: 14,
-        height: 10,
-        weight: 15.2,
-        building: "CS",
-        locker: "locker-b",
-        priority: "urgent",
-        status: "Awaiting Pickup",
-      }),
-      new Package({
-        barcode: "3333-4444-5555",
-        length: 8,
-        width: 8,
-        height: 6,
-        weight: 4.7,
-        building: "AH",
-        locker: "locker-c",
-        priority: "low",
-        status: "Loaded",
-      }),
-      new Package({
-        barcode: "3141-5926-5358",
-        length: 24,
-        width: 18,
-        height: 12,
-        weight: 32.4,
-        building: "FH",
-        locker: "locker-a",
-        priority: "urgent",
-        status: "On the Way",
-      }),
-    ];
-
-    savePackages(samplePackages);
-  }
+function formatPriority(priority) {
+  const value = String(priority || "");
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
 function createCell(value) {
   const cell = document.createElement("td");
-  cell.textContent = value;
+  cell.textContent = value ?? "";
   return cell;
 }
 
 function renderPackageTable() {
-  const packages = getPackages();
+  const packages = CampusEco.PackageStore.all();
   const searchValue = searchInput.value.trim().toLowerCase();
 
   packageTableBody.replaceChildren();
@@ -82,14 +36,17 @@ function renderPackageTable() {
     const row = document.createElement("tr");
 
     row.appendChild(createCell(pkg.barcode));
-    row.appendChild(createCell(pkg.building));
-    row.appendChild(createCell(pkg.getLockerName()));
-    row.appendChild(createCell(pkg.getDimensions()));
-    row.appendChild(createCell(`${pkg.weight} lb`));
-    const properlyCasedPriority =
-      pkg.priority.charAt(0).toUpperCase() + pkg.priority.slice(1);
-    row.appendChild(createCell(properlyCasedPriority));
-
+    row.appendChild(
+      createCell(
+        CampusEco.BUILDINGS[pkg.building] ? pkg.building : pkg.building,
+      ),
+    );
+    row.appendChild(createCell(pkg.locker));
+    row.appendChild(
+      createCell(`${pkg.lengthIn} x ${pkg.widthIn} x ${pkg.heightIn} ″`),
+    );
+    row.appendChild(createCell(`${pkg.weightLb} lb`));
+    row.appendChild(createCell(formatPriority(pkg.priority)));
     row.appendChild(createCell(pkg.status));
 
     const actionsCell = document.createElement("td");
@@ -110,25 +67,25 @@ function renderPackageTable() {
     packageTableBody.appendChild(row);
   });
 
-  searchMessage.textContent = "No matching packages found. Please try again with another barcode.";
+  searchMessage.textContent = "No matching packages found.";
   searchMessage.hidden = matchingPackages !== 0;
 }
 
 function renderUrgentTable() {
-  const packages = getPackages();
+  const packages = CampusEco.PackageStore.all();
 
   urgentTableBody.replaceChildren();
 
   packages
     .filter(function (pkg) {
-      return pkg.isUrgent();
+      return pkg.priority.toLowerCase() === "urgent";
     })
     .forEach(function (pkg) {
       const row = document.createElement("tr");
 
       row.appendChild(createCell(pkg.barcode));
       row.appendChild(createCell(pkg.building));
-      row.appendChild(createCell(pkg.getLockerName()));
+      row.appendChild(createCell(pkg.locker));
       row.appendChild(createCell(pkg.status));
 
       urgentTableBody.appendChild(row);
@@ -145,5 +102,4 @@ searchForm.addEventListener("submit", function (event) {
   renderPackageTable();
 });
 
-initializePackages();
 renderDashboard();
