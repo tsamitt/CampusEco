@@ -9,67 +9,83 @@
     />
     <title>Campus Eco Package Details</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/tracking.css" />
   </head>
 
-  <body>
-    <header>
-      <nav>
-        <h1>Campus Eco</h1>
-        <ul>
+  <body class="tracking-portal">
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Main">
+        <h1 class="brand">Campus Eco</h1>
+        <ul class="nav-links">
           <li><a href="operatorMain.html">Operators</a></li>
           <li><a href="courier.html">Couriers</a></li>
-          <li><a href="tracking.html">Package Tracking</a></li>
+          <li>
+            <a href="tracking.html" aria-current="page">Package Tracking</a>
+            <span id="nav-unread" class="count-badge" hidden></span>
+          </li>
         </ul>
       </nav>
     </header>
 
-    <main>
-      <section>
-        <h2>Package Details</h2>
+    <main id="main">
+      <h2>Package Details</h2>
+      <p><a href="tracking.html">Back to Your Packages</a></p>
+      <noscript>
+        <p class="notice">JavaScript is needed for live tracking in this version of the portal.</p>
+      </noscript>
 
-        <a href="tracking.html">Back to Your Packages</a>
+      <div id="not-found" class="card" hidden>
+        <h3>Package not found</h3>
+        <p>We could not find that tracking number. Go back and search again.</p>
+      </div>
 
-        <section>
-          <h3>Package Information</h3>
+      <div id="detail-content" class="detail-grid">
+        <section class="card" aria-labelledby="info-h">
+          <h3 id="info-h">Package Information</h3>
 
-          <table>
-            <caption>
-              Tracking Barcode 3141-5926-5358
+          <table class="kv-table">
+            <caption id="info-caption">
+              Tracking Barcode
             </caption>
 
             <tbody>
               <tr>
                 <th scope="row">Tracking Barcode</th>
-                <td>3141-5926-5358</td>
+                <td id="info-barcode"></td>
               </tr>
               <tr>
                 <th scope="row">Destination Building</th>
-                <td>FH, Ford Hall</td>
+                <td id="info-building"></td>
               </tr>
               <tr>
                 <th scope="row">Locker Array</th>
-                <td>Locker Array 1</td>
+                <td id="info-locker"></td>
               </tr>
               <tr>
                 <th scope="row">Weight</th>
-                <td>32.4 lb</td>
+                <td id="info-weight"></td>
               </tr>
               <tr>
                 <th scope="row">Priority</th>
-                <td>Urgent</td>
+                <td id="info-priority"></td>
               </tr>
               <tr>
                 <th scope="row">Current Status</th>
-                <td>En Route</td>
+                <td id="info-status"></td>
               </tr>
             </tbody>
           </table>
         </section>
 
-        <section>
-          <h3>Real-Time Location Tracking</h3>
+        <section class="card live" aria-labelledby="live-h">
+          <div class="card-head">
+            <h3 id="live-h">Real-Time Location Tracking</h3>
+            <span id="live-pill" class="pill pill-idle">Not moving yet</span>
+          </div>
 
-          <table>
+          <table class="kv-table">
             <caption>
               Current tracked location
             </caption>
@@ -77,149 +93,186 @@
             <tbody>
               <tr>
                 <th scope="row">Current Tracked Location</th>
-                <td>
-                  Electric Cart 4, Ellis Avenue (North) near Memorial Library
-                </td>
+                <td id="loc-where"></td>
               </tr>
               <tr>
                 <th scope="row">Nearest Building</th>
-                <td>ML, Memorial Library</td>
+                <td id="loc-near"></td>
               </tr>
               <tr>
                 <th scope="row">Last Updated</th>
-                <td>Oct 2, 11:52 AM</td>
+                <td id="loc-updated"></td>
               </tr>
               <tr>
                 <th scope="row">Destination</th>
-                <td>FH, Ford Hall</td>
+                <td id="loc-destination"></td>
+              </tr>
+              <tr>
+                <th scope="row">Cart Battery</th>
+                <td id="loc-battery"></td>
               </tr>
             </tbody>
           </table>
-          <!-- Phase 1 is static. In Phase 2/3 this panel will refresh automatically (JS/AJAX) with the cart's live position. -->
+
+          <div class="map-wrap" id="map-wrap">
+            <img
+              src="map.png"
+              alt="Campus map of Minnesota State University, Mankato. The delivery route runs from the Central Hub on the west side of campus to the destination building."
+              width="1532"
+              height="717"
+            />
+            <div id="route-layer" class="route-layer" aria-hidden="true"></div>
+            <span id="hub-marker" class="marker marker-hub" aria-hidden="true"><span class="marker-label">Hub</span></span>
+            <span id="dest-marker" class="marker marker-dest" aria-hidden="true"><span class="marker-label"></span></span>
+            <span id="cart-marker" class="marker marker-cart" aria-hidden="true"><span class="marker-label"></span></span>
+          </div>
+          <p id="live-status" class="visually-hidden" role="status" aria-live="polite"></p>
         </section>
 
-        <section>
-          <h3>Delivery Status</h3>
+        <section class="card" aria-labelledby="status-h">
+          <h3 id="status-h">Delivery Status</h3>
 
-          <table>
+          <div
+            class="progress"
+            role="progressbar"
+            aria-label="Delivery progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            id="progress"
+          >
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+
+          <table class="responsive-table" role="table">
             <caption>
               Delivery milestones for this package
             </caption>
 
-            <thead>
-              <tr>
-                <th scope="col">Milestone</th>
-                <th scope="col">Timestamp</th>
-                <th scope="col">Status</th>
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col" role="columnheader">Milestone</th>
+                <th scope="col" role="columnheader">Timestamp</th>
+                <th scope="col" role="columnheader">Status</th>
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>Checked In</td>
-                <td>Oct 1, 9:14 AM</td>
-                <td>Complete</td>
-              </tr>
-              <tr>
-                <td>Loaded</td>
-                <td>Oct 2, 10:05 AM</td>
-                <td>Complete</td>
-              </tr>
-              <tr>
-                <td>En Route</td>
-                <td>Oct 2, 11:40 AM</td>
-                <td>Current</td>
-              </tr>
-              <tr>
-                <td>Delivered</td>
-                <td>&ndash;</td>
-                <td>Pending</td>
-              </tr>
-            </tbody>
+            <tbody id="timeline-body" role="rowgroup"></tbody>
           </table>
-          <!-- Status highlighting (e.g. a progress bar) will be added with JS/CSS in Phase 2. -->
         </section>
 
-        <section>
-          <h3>Confirm Receipt</h3>
+        <section class="card" aria-labelledby="carbon-h">
+          <h3 id="carbon-h">Carbon Footprint for This Delivery</h3>
 
-          <p>* Required field</p>
-          <!-- A real signature pad and server-side verification will be added in Phase 2/3. For now this is a typed confirmation. -->
-
-          <form action="/submit" method="post">
-            <label for="recipient-name">Recipient Name *</label>
-            <input
-              type="text"
-              id="recipient-name"
-              name="recipient-name"
-              required
-            />
-
-            <fieldset>
-              <legend>Condition on Arrival *</legend>
-              <label>
-                <input type="radio" name="condition" value="good" required />
-                Good condition
-              </label>
-              <label>
-                <input type="radio" name="condition" value="damaged" />
-                Damaged
-              </label>
-            </fieldset>
-
-            <label>
-              <input
-                type="checkbox"
-                id="confirm-receipt"
-                name="confirm-receipt"
-                required
-              />
-              I confirm I received this package *
-            </label>
-
-            <label for="receipt-notes">Notes (optional)</label>
-            <textarea
-              name="receipt-notes"
-              id="receipt-notes"
-              rows="3"
-            ></textarea>
-
-            <button type="submit">Sign and Confirm Receipt</button>
-          </form>
-        </section>
-
-        <section>
-          <h3>Carbon Footprint for This Delivery</h3>
-
-          <table>
+          <table class="kv-table">
             <caption>
-              Estimated environmental impact of delivering this package by
-              electric cart
+              Estimated environmental impact of delivering this package by electric cart
             </caption>
 
             <tbody>
               <tr>
                 <th scope="row">Distance Covered by Cart</th>
-                <td>0.6 mi</td>
+                <td id="carbon-miles"></td>
+              </tr>
+              <tr>
+                <th scope="row">Car Miles Avoided (round trip)</th>
+                <td id="carbon-avoided"></td>
               </tr>
               <tr>
                 <th scope="row">Estimated CO2 Saved vs. Car Trip</th>
-                <td>0.4 kg</td>
+                <td id="carbon-co2"></td>
               </tr>
             </tbody>
           </table>
-
-          <p>
-            <!-- These figures will be calculated from real route and vehicle data once the backend is built in Phase 3. -->
-            Figures above are placeholder estimates for Phase 1 layout purposes.
-          </p>
+          <p class="hint">Updates as the cart moves. Assumes about 0.404 kg CO2 per car mile.</p>
         </section>
-      </section>
+
+        <section class="card" aria-labelledby="receipt-h">
+          <h3 id="receipt-h">Confirm Receipt</h3>
+
+          <p id="receipt-note" class="notice" role="status"></p>
+          <p>* Required field</p>
+
+          <form id="receipt-form" action="/submit" method="post">
+            <fieldset id="receipt-fields" class="plain" disabled>
+              <legend class="visually-hidden">Receipt confirmation</legend>
+
+              <div class="field">
+                <label for="recipient-name">Recipient Name *</label>
+                <input
+                  type="text"
+                  id="recipient-name"
+                  name="recipient-name"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+
+              <fieldset>
+                <legend>Condition on Arrival *</legend>
+                <label class="check">
+                  <input type="radio" name="condition" value="good" required />
+                  Good condition
+                </label>
+                <label class="check">
+                  <input type="radio" name="condition" value="damaged" />
+                  Damaged
+                </label>
+              </fieldset>
+
+              <label class="check">
+                <input type="checkbox" id="confirm-receipt" name="confirm-receipt" required />
+                I confirm I received this package *
+              </label>
+
+              <div class="field">
+                <label for="receipt-notes" id="notes-label">Notes (optional)</label>
+                <textarea name="receipt-notes" id="receipt-notes" rows="3"></textarea>
+              </div>
+
+              <p id="receipt-feedback" class="feedback" role="alert"></p>
+              <button type="submit" class="btn">Sign and Confirm Receipt</button>
+            </fieldset>
+          </form>
+
+          <div id="receipt-confirmation" class="confirmation" role="status" hidden></div>
+        </section>
+
+        <section class="card demo" aria-labelledby="demo-h">
+          <div class="card-head">
+            <h3 id="demo-h">Demo Controls</h3>
+            <button
+              type="button"
+              id="demo-toggle"
+              class="btn btn-secondary btn-small"
+              aria-expanded="false"
+              aria-controls="demo-panel"
+            >
+              Show controls
+            </button>
+          </div>
+          <div id="demo-panel" class="slide-panel" hidden>
+            <p class="hint">
+              For presenting this build. In Phase 3 the courier's updates will drive these changes.
+            </p>
+            <div class="btn-row">
+              <button type="button" id="sim-toggle" class="btn" aria-pressed="false">Pause cart</button>
+              <button type="button" id="advance-status" class="btn btn-secondary">Advance status</button>
+              <button type="button" id="reset-package" class="btn btn-secondary">Restart this package</button>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
 
-    <footer>
-      <p>&copy; 2026 Minnesota State University, Mankato</p>
-      <p>Campus Eco</p>
+    <footer class="site-footer">
+      <p>Campus Eco Phase 2 build. Data is stored in this browser only.</p>
+      <button type="button" id="reset-demo" class="btn-link">Reset demo data</button>
     </footer>
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/trackingdetail.js"></script>
   </body>
 </html>
