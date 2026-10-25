@@ -50,6 +50,76 @@ nav h1 {
   display: none;
 }
 
+#package-modal {
+  width: min(90%, 550px);
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+#package-modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+#package-modal form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+#package-modal input,
+#package-modal select,
+#package-modal textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+#package-modal input[readonly] {
+  background-color: #eeeeee;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+#package-modal [role="alert"] {
+  color: #b00040;
+}
+
+#package-modal [hidden] {
+  display: none;
+}
+
+#package-modal form input[type="checkbox"]#modal-has-special-instructions {
+  display: block;
+  width: 16px;
+  height: 16px;
+  justify-self: start;
+  align-self: start;
+  margin: 5px 0 10px;
+  padding: 0;
+}
+
+.measurement-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.measurement-input input {
+  flex: 1;
+  min-width: 0;
+}
+
+.measurement-input span {
+  white-space: nowrap;
+}
+
 nav ul {
   list-style: none;
   display: flex;

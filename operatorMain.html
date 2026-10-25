@@ -41,6 +41,114 @@
             <button type="button" id="dismiss-action-button">Dismiss</button>
           </div>
         </section>
+
+        <dialog id="package-modal" aria-labelledby="package-modal-title">
+          <h3 id="package-modal-title">Package Details</h3>
+
+          <form id="package-modal-form">
+            <label for="modal-barcode">Tracking Barcode</label>
+            <input id="modal-barcode" type="text" readonly />
+
+            <label for="modal-building">Destination Building Code</label>
+            <input
+              id="modal-building"
+              type="text"
+              pattern="[A-Za-z]{2}"
+              maxlength="2"
+              required
+            />
+            <p id="modal-building-error" role="alert" hidden>
+              Please enter a valid campus building code.
+            </p>
+
+            <label for="modal-locker">Delivery Locker Array</label>
+            <select id="modal-locker" required>
+              <option value="Locker Array 1">Locker Array 1</option>
+              <option value="Locker Array 2">Locker Array 2</option>
+              <option value="Locker Array 3">Locker Array 3</option>
+            </select>
+
+            <label for="modal-length">Package Length</label>
+            <div class="measurement-input">
+              <input
+                id="modal-length"
+                type="number"
+                min="1"
+                max="48"
+                step="0.1"
+                required
+              />
+              <span> ″</span>
+            </div>
+
+            <label for="modal-width">Package Width</label>
+            <div class="measurement-input">
+              <input
+                id="modal-width"
+                type="number"
+                min="1"
+                max="48"
+                step="0.1"
+                required
+              />
+              <span> ″</span>
+            </div>
+
+            <label for="modal-height">Package Height</label>
+            <div class="measurement-input">
+              <input
+                id="modal-height"
+                type="number"
+                min="1"
+                max="48"
+                step="0.1"
+                required
+              />
+              <span> ″</span>
+            </div>
+
+            <label for="modal-weight">Package Weight</label>
+            <div class="measurement-input">
+              <input
+                id="modal-weight"
+                type="number"
+                min="0"
+                max="120"
+                step="0.1"
+                required
+              />
+              <span> lb</span>
+            </div>
+
+            <label for="modal-priority">Delivery Priority</label>
+            <select id="modal-priority" required>
+              <option value="Low">Low</option>
+              <option value="Standard">Standard</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+
+            <label for="modal-status">Package Status</label>
+            <input id="modal-status" type="text" readonly />
+
+            <label for="modal-has-special-instructions">
+              Has Special Instructions
+            </label>
+            <input type="checkbox" id="modal-has-special-instructions" />
+
+            <div id="modal-instructions-container" hidden>
+              <label for="modal-instructions">Instructions</label>
+              <textarea id="modal-instructions" rows="5"></textarea>
+            </div>
+
+            <p id="package-modal-error" role="alert" hidden></p>
+
+            <div class="modal-actions">
+              <button type="submit" id="modal-save-button">Save Changes</button>
+              <button type="button" id="modal-close-button">Close</button>
+            </div>
+          </form>
+        </dialog>
+
         <section>
           <h3>Package Activity</h3>
 
