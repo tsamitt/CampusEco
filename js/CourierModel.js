@@ -6,9 +6,7 @@
 
   const C = window.CampusEco;
 
-  // ---------------------------------------------------------------------
   // Constants
-  // ---------------------------------------------------------------------
   const STORAGE = {
     courier: "campuseco.courier",
     claims: "campuseco.courierClaims",
@@ -31,9 +29,7 @@
     return BARCODE_PATTERN.test(String(barcode));
   }
 
-  // ---------------------------------------------------------------------
   // Storage helper (same approach as Models.js: falls back to memory)
-  // ---------------------------------------------------------------------
   const memory = {};
   const storage = {
     get: function (key) {
@@ -61,9 +57,8 @@
     },
   };
 
-  // ---------------------------------------------------------------------
-  // Models
-  // ---------------------------------------------------------------------
+  // Models //
+
 
   // An electric cart in the courier fleet. Builds on the shared Vehicle.
   class EcoCart extends C.Vehicle {
@@ -146,9 +141,7 @@
     }
   }
 
-  // ---------------------------------------------------------------------
-  // Stores (localStorage)
-  // ---------------------------------------------------------------------
+  // Stores (localStorage) //
   function seedCarts() {
     return [
       { id: "Cart 1", batteryPct: 82 },
@@ -235,9 +228,7 @@
     },
   };
 
-  // ---------------------------------------------------------------------
   // Dispatch: courier rules applied to the shared packages
-  // ---------------------------------------------------------------------
   const Dispatch = {
     isClaimed: function (pkg) {
       return Object.prototype.hasOwnProperty.call(
