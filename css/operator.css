@@ -1,0 +1,55 @@
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.priority-urgent {
+  background-color: #fbe4e4;
+  color: #9b1c1c;
+}
+
+.priority-standard {
+  background-color: #ece4f6;
+  color: #4f2683;
+}
+
+.priority-low {
+  background-color: #eee;
+  color: #555;
+}
+
+.badge-checked-in {
+  background: #e8e6ee;
+  color: #3b3846;
+}
+.badge-awaiting-pickup {
+  background: #fff0c2;
+  color: #5c4300;
+}
+.badge-claimed {
+  background: #ffe9c7;
+  color: #6b3d00;
+}
+.badge-loaded {
+  background: #dce9fb;
+  color: #0f3c78;
+}
+.badge-en-route {
+  background: #e6dcf5;
+  color: #3a2264;
+}
+.badge-delivered {
+  background: #d9f0e1;
+  color: #0d4d29;
+}
+.badge-cancelled {
+  background: #f1f1f1;
+  color: #666;
+}
+
+tr[data-group="delivered"] {
+  color: #888;
+}

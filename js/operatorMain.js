@@ -1,4 +1,3 @@
-
 "use strict";
 
 const packageTableBody = $("#package-table-body");
@@ -11,14 +10,29 @@ const actionBanner = $("#action-banner");
 const actionBannerMessage = $("#action-banner-message");
 const confirmActionButton = $("#confirm-action-button");
 const dismissActionButton = $("#dismiss-action-button");
-const modalInstructionsCheckbox = $(
-  "#modal-has-special-instructions",
-);
-const modalInstructionsContainer = $(
-  "#modal-instructions-container",
-);
+const modalInstructionsCheckbox = $("#modal-has-special-instructions");
+const modalInstructionsContainer = $("#modal-instructions-container");
 
 let pendingAction = null;
+
+function priorityBadge(priority) {
+  const value = String(priority || "");
+  const form = value.toLowerCase();
+
+  return $("<span>")
+    .addClass("badge priority-" + form)
+    .text(formatPriority(value));
+}
+
+function statusBadge(status) {
+  const value = String(status || "");
+  const form = value.toLowerCase().replace(/\s+/g, "-");
+
+  return $("<span>")
+    .addClass("badge badge-" + form)
+    .text(value);
+}
+
 function formatPriority(priority) {
   const value = String(priority || "");
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
@@ -56,9 +70,8 @@ function renderPackageTable() {
       createCell(`${pkg.lengthIn} x ${pkg.widthIn} x ${pkg.heightIn} ″`),
     );
     row.append(createCell(`${pkg.weightLb} lb`));
-    row.append(createCell(formatPriority(pkg.priority)));
-    row.append(createCell(pkg.status));
-
+    row.append($("<td>").append(priorityBadge(pkg.priority)));
+    row.append($("<td>").append(statusBadge(pkg.status)));
     const actionsCell = $("<td>");
 
     ["View", "Edit", "Cancel"].forEach(function (action) {
@@ -91,8 +104,7 @@ function renderUrgentTable() {
   packages
     .filter(function (pkg) {
       return (
-        pkg.priority.toLowerCase() === "urgent" &&
-        pkg.status !== "Cancelled"
+        pkg.priority.toLowerCase() === "urgent" && pkg.status !== "Cancelled"
       );
     })
     .forEach(function (pkg) {
@@ -101,7 +113,7 @@ function renderUrgentTable() {
       row.append(createCell(pkg.barcode));
       row.append(createCell(pkg.building));
       row.append(createCell(pkg.locker));
-      row.append(createCell(pkg.status));
+      row.append($("<td>").append(statusBadge(pkg.status)));
 
       urgentTableBody.append(row);
     });
@@ -186,9 +198,7 @@ function openPackageModal(barcode, mode) {
   packageModalError.prop("hidden", true);
   modalBuildingError.prop("hidden", true);
 
-  $("#package-modal-title").text(
-    isReadOnly ? "View Package" : "Edit Package",
-  );
+  $("#package-modal-title").text(isReadOnly ? "View Package" : "Edit Package");
 
   packageModal[0].showModal();
 }
@@ -227,7 +237,7 @@ packageTableBody.on("click", "button[data-action]", function () {
     openPackageModal(barcode, "edit");
   }
 });
-// don't mess this up 
+// don't mess this up
 modalCloseButton.on("click", closePackageModal);
 
 packageModal.on("click", function (event) {
