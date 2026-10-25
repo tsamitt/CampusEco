@@ -2,13 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,
-      initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Campus Eco Courier Updates</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/courier.css" />
   </head>
 
   <body>
@@ -16,10 +13,10 @@
       <nav>
         <h1>Campus Eco</h1>
         <ul>
-      <li><a href="operatorMain.html">Operators</a></li>
-      <li><a href="courier.html">Couriers</a></li>
-      <li><a href="tracking.html">Package Tracking</a></li>
-    </ul>
+          <li><a href="operatorMain.html">Operators</a></li>
+          <li><a href="courier.html">Couriers</a></li>
+          <li><a href="tracking.html">Package Tracking</a></li>
+        </ul>
       </nav>
     </header>
 
@@ -31,46 +28,60 @@
 
         <section>
           <h3>Claim a Delivery</h3>
-          <form>
+          <form id="claim-form">
             <p>* Required field</p>
-            
+
             <div>
               <label for="claim-barcode">Tracking Barcode *</label>
-              <input type="text" id="claim-barcode" name="claim-barcode" placeholder="1234-5678-9012" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}" title="Format: 4 digits, dash, 4 digits, dash, 4 digits" required />
+              <input
+                type="text"
+                id="claim-barcode"
+                name="claim-barcode"
+                placeholder="1234-5678-9012"
+                pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}"
+                title="Format: 4 digits, dash, 4 digits, dash, 4 digits"
+                list="queue-barcodes"
+                autocomplete="off"
+                required
+              />
+              <!-- Filled by JS with barcodes still in the route queue -->
+              <datalist id="queue-barcodes"></datalist>
+              <span id="claim-info" class="field-hint"></span>
             </div>
-            
+
             <div>
               <label for="claim-cart">Cart *</label>
+              <!-- Cart options are filled by JS from the courier cart fleet -->
               <select id="claim-cart" name="claim-cart" required>
                 <option value="">Select a cart</option>
-                <option value="cart-1">Cart 1</option>
-                <option value="cart-2">Cart 2</option>
-                <option value="cart-3">Cart 3</option>
               </select>
             </div>
-            
+
             <div>
               <label for="claim-weight">Verified Weight (lb, max 150) *</label>
               <input type="number" id="claim-weight" name="claim-weight" min="0.1" max="150" step="0.1" required />
             </div>
-            
+
             <div>
               <label>
-                <input type="checkbox" name="claim-confirm" required /> I confirm I can carry this delivery in my load *
+                <input type="checkbox" id="claim-confirm" name="claim-confirm" required /> I confirm I can carry this
+                delivery in my load *
               </label>
             </div>
-            
+
             <div>
               <button type="submit">Claim Delivery</button>
               <button type="reset">Clear</button>
             </div>
+
+            <div id="claim-message" class="form-message" role="status" aria-live="polite" hidden></div>
           </form>
         </section>
 
         <section>
           <h3>Update Transit Milestone</h3>
 
-          <form>
+          <form id="status-form">
             <p>* Required field</p>
 
             <label for="status-barcode">Tracking Barcode *</label>
@@ -81,60 +92,62 @@
               placeholder="1234-5678-9012"
               pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}"
               title="Format: 4 digits, dash, 4 digits, dash, 4 digits"
+              list="my-barcodes"
+              autocomplete="off"
               required
             />
+            <!-- Filled by JS with barcodes you have claimed -->
+            <datalist id="my-barcodes"></datalist>
+            <span id="status-info" class="field-hint"></span>
 
-            <fieldset> <!-- Requires user to select deliver status -->
+            <fieldset>
+              <!-- Requires user to select deliver status -->
               <legend>New Status *</legend>
               <label>
-                <input type="radio" name="status" value="loaded" required />
+                <input type="radio" name="status" value="Loaded" required />
                 Loaded
               </label>
               <label>
-                <input type="radio" name="status" value="en-route" />
+                <input type="radio" name="status" value="En Route" />
                 En Route
               </label>
               <label>
-                <input type="radio" name="status" value="delivered" />
+                <input type="radio" name="status" value="Delivered" />
                 Delivered
               </label>
             </fieldset>
 
             <label for="status-notes">Notes?</label>
-            <textarea
-              id="status-notes"
-              name="status-notes"
-              rows="3"
-              maxlength="250"
-            ></textarea>
+            <textarea id="status-notes" name="status-notes" rows="3" maxlength="250"></textarea>
+            <span id="notes-count" class="field-hint">0 / 250</span>
 
             <button type="submit">Update Status</button>
-          </form>
-      </section>
 
-      <section>
+            <div id="status-message" class="form-message" role="status" aria-live="polite" hidden></div>
+          </form>
+        </section>
+
+        <section>
           <h3>Report Battery Status</h3>
 
-          <form>
+          <form id="battery-form">
             <p>* Required field</p>
 
             <label for="battery-cart">Cart *</label>
+            <!-- Cart options are filled by JS from the courier cart fleet -->
             <select id="battery-cart" name="battery-cart" required>
               <option value="">Select a cart</option>
-              <option value="cart-1">Cart 1</option>
-              <option value="cart-2">Cart 2</option>
-              <option value="cart-3">Cart 3</option>
             </select>
+            <span id="battery-last" class="field-hint"></span>
 
             <label for="battery-level">Battery Level (%) *</label>
-            <input
-              type="number"
-              id="battery-level"
-              name="battery-level"
-              min="0"
-              max="100"
-              required
-            />
+            <input type="number" id="battery-level" name="battery-level" min="0" max="100" required />
+
+            <!-- Live preview bar, updated by JS as you type -->
+            <div class="battery-card battery-good" id="battery-preview">
+              <div class="battery-bar"><div class="battery-fill" style="width: 0"></div></div>
+              <span id="battery-preview-text">Enter a level to preview</span>
+            </div>
 
             <fieldset>
               <legend>Report Type *</legend>
@@ -169,13 +182,22 @@
             </fieldset>
 
             <button type="submit">Submit Report</button>
+
+            <div id="battery-message" class="form-message" role="status" aria-live="polite" hidden></div>
           </form>
         </section>
+      </section>
     </main>
 
-<footer>
-  <p>&copy; 2026 Minnesota State University, Mankato</p>
-  <p>Campus Eco</p>
-</footer>
+    <footer>
+      <p>&copy; 2026 Minnesota State University, Mankato</p>
+      <p>Campus Eco</p>
+    </footer>
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/Models.js"></script>
+    <script src="js/Common.js"></script>
+    <script src="js/courierModels.js"></script>
+    <script src="js/courierUpdate.js"></script>
   </body>
 </html>
