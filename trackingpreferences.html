@@ -9,42 +9,64 @@
     />
     <title>Campus Eco Delivery Preferences</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/tracking.css" />
   </head>
 
-  <body>
-    <header>
-      <nav>
-        <h1>Campus Eco</h1>
-        <ul>
+  <body class="tracking-portal">
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <nav class="site-nav" aria-label="Main">
+        <h1 class="brand">Campus Eco</h1>
+        <ul class="nav-links">
           <li><a href="operatorMain.html">Operators</a></li>
           <li><a href="courier.html">Couriers</a></li>
-          <li><a href="tracking.html">Package Tracking</a></li>
+          <li>
+            <a href="tracking.html" aria-current="page">Package Tracking</a>
+            <span id="nav-unread" class="count-badge" hidden></span>
+          </li>
         </ul>
       </nav>
     </header>
 
-    <main>
-      <section>
-        <h2>Delivery Preferences</h2>
+    <main id="main">
+      <h2>Delivery Preferences</h2>
+      <p><a href="tracking.html">Back to Your Packages</a></p>
+      <noscript>
+        <p class="notice">JavaScript is needed to save preferences in this version of the portal.</p>
+      </noscript>
 
-        <a href="tracking.html">Back to Your Packages</a>
+      <section class="card narrow" aria-labelledby="prefs-h">
+        <h3 id="prefs-h">Update Your Preferences</h3>
 
-        <section>
-          <h3>Update Your Preferences</h3>
+        <form id="prefs-form" action="/submit" method="post">
+          <fieldset>
+            <legend>Notify Me By</legend>
+            <label class="check">
+              <input type="checkbox" id="notify-email" name="notify" value="email" />
+              Email
+            </label>
+            <label class="check">
+              <input type="checkbox" id="notify-text" name="notify" value="text" />
+              Text Message
+            </label>
 
-          <form action="/submit" method="post">
-            <fieldset>
-              <legend>Notify Me By</legend>
-              <label>
-                <input type="checkbox" name="notify" value="email" checked />
-                Email
-              </label>
-              <label>
-                <input type="checkbox" name="notify" value="text" />
-                Text Message
-              </label>
-            </fieldset>
+            <div id="phone-field" class="field" hidden>
+              <label for="phone">Mobile Number *</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="507-555-0123"
+                pattern="^\(?\d{3}\)?[\-.\s]?\d{3}[\-.\s]?\d{4}$"
+                title="Enter a 10 digit U.S. phone number, for example 507-555-0123"
+              />
+            </div>
+          </fieldset>
 
+          <div class="field">
             <label for="delivery-window">Preferred Delivery Window</label>
             <select id="delivery-window" name="delivery-window">
               <option value="">No preference</option>
@@ -52,7 +74,9 @@
               <option value="midday">Midday (11 AM &ndash; 2 PM)</option>
               <option value="afternoon">Afternoon (2 PM &ndash; 5 PM)</option>
             </select>
+          </div>
 
+          <div class="field">
             <label for="pref-building">Preferred Pickup Building</label>
             <input
               type="text"
@@ -61,36 +85,51 @@
               pattern="^[A-Za-z]{2}$"
               title="Please enter a two character building code."
               placeholder="e.g. ML"
+              maxlength="2"
+              autocomplete="off"
+              list="building-list"
             />
+            <datalist id="building-list"></datalist>
+            <p id="building-name" class="hint" role="status" aria-live="polite"></p>
+          </div>
 
-            <fieldset>
-              <legend>If Locker Array Is Full</legend>
-              <label>
-                <input type="radio" name="fallback" value="hold" checked />
-                Hold at central hub
-              </label>
-              <label>
-                <input type="radio" name="fallback" value="nearest" />
-                Deliver to nearest available locker
-              </label>
-            </fieldset>
-
-            <label>
-              <input type="checkbox" name="signature-on-file" />
-              Keep my signature on file to skip manual confirmation for
-              low-priority packages
+          <fieldset>
+            <legend>If Locker Array Is Full</legend>
+            <label class="check">
+              <input type="radio" name="fallback" value="hold" />
+              Hold at central hub
             </label>
-            <!-- Will only take effect once account storage is added in Phase 3. -->
+            <label class="check">
+              <input type="radio" name="fallback" value="nearest" />
+              Deliver to nearest available locker
+            </label>
+          </fieldset>
 
-            <button type="submit">Save Preferences</button>
-          </form>
-        </section>
+          <label class="check">
+            <input type="checkbox" id="signature-on-file" name="signature-on-file" />
+            Keep my signature on file to skip manual confirmation for low-priority packages
+          </label>
+          <p class="hint">Saved in this browser for now. Account storage comes in Phase 3.</p>
+
+          <p id="prefs-feedback" class="feedback" role="alert"></p>
+
+          <div class="btn-row">
+            <button type="submit" class="btn">Save Preferences</button>
+            <button type="button" id="prefs-reset" class="btn btn-secondary">Reset to defaults</button>
+          </div>
+          <p id="prefs-toast" class="toast" role="status" hidden>Preferences saved.</p>
+        </form>
       </section>
     </main>
 
-    <footer>
-      <p>&copy; 2026 Minnesota State University, Mankato</p>
-      <p>Campus Eco</p>
+    <footer class="site-footer">
+      <p>Campus Eco Phase 2 build. Data is stored in this browser only.</p>
+      <button type="button" id="reset-demo" class="btn-link">Reset demo data</button>
     </footer>
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/trackingpreferences.js"></script>
   </body>
 </html>
