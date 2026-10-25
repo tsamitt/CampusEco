@@ -2,13 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,
-      initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Campus Eco Courier Registration</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/courier.css" />
   </head>
 
   <body>
@@ -29,10 +26,16 @@
 
         <a href="courier.html">Back to Courier Dashboard</a>
 
-        <section>
+        <!-- Shown by JS when a courier is already registered on this device -->
+        <div id="current-courier" class="form-message is-success" hidden>
+          <span id="current-courier-text"></span>
+          <button type="button" id="sign-out">Sign out</button>
+        </div>
+
+        <section id="register-section">
           <h3>Create a Courier Account</h3>
 
-          <form>
+          <form id="register-form">
             <p>* Required field</p>
             <!-- Requires user to input data and valid email address -->
 
@@ -47,6 +50,7 @@
               placeholder="name@mnsu.edu"
               required
             />
+            <span id="email-hint" class="field-hint">Use your @mnsu.edu address</span>
 
             <label for="reg-password">Password *</label>
             <input
@@ -56,6 +60,9 @@
               minlength="8"
               required
             />
+            <button type="button" id="toggle-password">Show</button>
+            <div class="strength-meter"><div id="strength-fill" class="strength-fill"></div></div>
+            <span id="strength-text" class="field-hint">At least 8 characters</span>
 
             <label for="reg-shift">Preferred Shift *</label>
             <select id="reg-shift" name="reg-shift" required>
@@ -77,9 +84,16 @@
                 Walking Courier
               </label>
             </fieldset>
+            <span id="role-hint" class="field-hint"></span>
 
             <button type="submit">Register</button>
           </form>
+        </section>
+
+        <!-- Shown after a successful registration -->
+        <section id="register-success" class="form-message is-success" hidden>
+          <p id="register-success-text"></p>
+          <a href="courier.html">Go to Courier Dashboard</a>
         </section>
       </section>
     </main>
@@ -88,5 +102,11 @@
       <p>&copy; 2026 Minnesota State University, Mankato</p>
       <p>Campus Eco</p>
     </footer>
+
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/Models.js"></script>
+    <script src="js/Common.js"></script>
+    <script src="js/courierModels.js"></script>
+    <script src="js/courierRegister.js"></script>
   </body>
 </html>
