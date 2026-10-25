@@ -67,66 +67,8 @@
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>1234-5678-9012</td>
-                <td>AH</td>
-                <td>Locker Array 1</td>
-                <td>12 x 10 x 8 ″</td>
-                <td>8.5 lb</td>
-                <td>Standard</td>
-                <td>Checked In</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Edit</button>
-                  <button type="button">Cancel</button>
-                </td>
-              </tr>
-
-              <tr>
-                <td>1111-2222-3333</td>
-                <td>CS</td>
-                <td>Locker Array 2</td>
-                <td>18 x 14 x 10 ″</td>
-                <td>15.2 lb</td>
-                <td>Urgent</td>
-                <td>Awaiting Pickup</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Edit</button>
-                  <button type="button">Cancel</button>
-                </td>
-              </tr>
-
-              <tr>
-                <td>3333-4444-5555</td>
-                <td>AH</td>
-                <td>Locker Array 3</td>
-                <td>8 x 8 x 6 ″</td>
-                <td>4.7 lb</td>
-                <td>Low</td>
-                <td>Loaded</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Edit</button>
-                  <button type="button">Cancel</button>
-                </td>
-              </tr>
-
-              <tr>
-                <td>3141-5926-5358</td>
-                <td>FH</td>
-                <td>Locker Array 1</td>
-                <td>24 x 18 x 12 ″</td>
-                <td>32.4 lb</td>
-                <td>Urgent</td>
-                <td>On the Way</td>
-                <td>
-                  <button type="button">View</button>
-                  <button type="button">Edit</button>
-                  <button type="button">Cancel</button>
-                </td>
-              </tr>
+            <tbody id="package-table-body">
+              <!-- empty because the JS functions will actually be building the table from local storage.-->
             </tbody>
           </table>
         </section>
@@ -148,19 +90,8 @@
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td>1111-2222-3333</td>
-                <td>CS</td>
-                <td>Locker Array 2</td>
-                <td>Awaiting Pickup</td>
-              </tr>
-              <tr>
-                <td>3141-5926-5358</td>
-                <td>FH</td>
-                <td>Locker Array 1</td>
-                <td>On the Way</td>
-              </tr>
+            <tbody id="urgent-table-body">
+              <!-- empty because the JS functions will actually be building the table from local storage.-->
             </tbody>
           </table>
         </section>
@@ -171,6 +102,7 @@
       <p>&copy; 2026 Minnesota State University, Mankato</p>
       <p>Campus Eco</p>
     </footer>
+    <script src="Package.js"></script>
     <script src="operatorMain.js"></script>
   </body>
 </html>
