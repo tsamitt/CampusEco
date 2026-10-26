@@ -222,6 +222,22 @@ tr.flash td {
   background-color: #2e9e45;
 }
 
+/* Package count on a pin when one building has more than one delivery */
+.pin-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background-color: #ffc82e;
+  color: #222;
+  font-size: 11px;
+}
+
 .map-hub {
   padding: 3px 6px;
   background-color: #4f2683;

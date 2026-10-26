@@ -1,6 +1,13 @@
 /*
- * FOR TESTING!!!!!!!!!!!!!
+ * Courier-side models built on top of the shared Models.js (Phase 2, Task 2.1).
+ *  - EcoCart extends the shared Vehicle with battery reports and issues
+ *  - EcoCourier represents the student worker using the portal
+ *  - Dispatch holds the courier rules (queue, claiming, status changes)
+ * Packages themselves live in CampusEco.PackageStore, so a package an operator
+ * checks in shows up in the courier queue, and a courier's status update shows
+ * up on the End-User tracking pages.
  */
+
 (function (window) {
   "use strict";
 

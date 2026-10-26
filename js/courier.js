@@ -381,22 +381,55 @@ $(function () {
     };
   }
 
+  // Groups the active deliveries by building, so two packages for the same
+  // building become one stop. activeStops() is already sorted most urgent
+  // first, so each stop keeps the position of its most urgent package.
+  function groupStopsByBuilding() {
+    const stops = [];
+    K.Dispatch.activeStops().forEach(function (pkg) {
+      let stop = stops.find(function (s) {
+        return s.building === pkg.building;
+      });
+      if (!stop) {
+        stop = { building: pkg.building, name: pkg.buildingName, packages: [] };
+        stops.push(stop);
+      }
+      stop.packages.push(pkg);
+    });
+    return stops;
+  }
+
+  function barcodeList(stop) {
+    return stop.packages
+      .map(function (pkg) {
+        return pkg.barcode;
+      })
+      .join(", ");
+  }
+
   function renderMapPins() {
     $map.find(".map-pin").remove();
-    K.Dispatch.activeStops().forEach(function (pkg, i) {
-      const point = C.BUILDING_POINTS[pkg.building];
+    groupStopsByBuilding().forEach(function (stop, i) {
+      const point = C.BUILDING_POINTS[stop.building];
       if (!point) return;
-      $("<div>")
+      const $pin = $("<div>")
         .addClass("map-pin")
         .attr({
-          title: pkg.barcode + " - " + pkg.buildingName,
-          "data-building": pkg.building,
+          title: stop.name + ": " + barcodeList(stop),
+          "data-building": stop.building,
         })
         .text(i + 1)
-        .css(pointCss(point))
-        .hide()
-        .appendTo($map)
-        .fadeIn(C.animationMs(400));
+        .css(pointCss(point));
+
+      // Small badge with the package count when a stop has more than one package.
+      if (stop.packages.length > 1) {
+        $("<span>")
+          .addClass("pin-count")
+          .text(stop.packages.length)
+          .appendTo($pin);
+      }
+
+      $pin.hide().appendTo($map).fadeIn(C.animationMs(400));
     });
   }
 
@@ -424,8 +457,8 @@ $(function () {
     queueRoute(C.routeTo(building).slice(1));
   }
 
-  $("#start-route").on("click", function () {
-    const stops = K.Dispatch.activeStops();
+    $("#start-route").on("click", function () {
+    const stops = groupStopsByBuilding();
     const $button = $(this);
 
     if (stops.length === 0) {
@@ -437,15 +470,24 @@ $(function () {
     $button.prop("disabled", true);
     $map.find(".map-pin").removeClass("visited");
 
-    // Out to each stop and back to the hub, most urgent first.
-    stops.forEach(function (pkg, i) {
-      const route = C.routeTo(pkg.building);
+    // Out to each building once and back to the hub, most urgent first.
+    stops.forEach(function (stop, i) {
+      const route = C.routeTo(stop.building);
+      const count = stop.packages.length;
       queueRoute(route.slice(1), function () {
         $("#route-status").text(
-          "Stop " + (i + 1) + ": " + pkg.barcode + " at " + pkg.buildingName,
+          "Stop " +
+            (i + 1) +
+            ": " +
+            stop.name +
+            " - " +
+            count +
+            (count === 1 ? " package (" : " packages (") +
+            barcodeList(stop) +
+            ")",
         );
         $map
-          .find(".map-pin[data-building='" + pkg.building + "']")
+          .find(".map-pin[data-building='" + stop.building + "']")
           .addClass("visited");
       });
       $cart.delay(C.animationMs(600));
@@ -465,7 +507,6 @@ $(function () {
     $("#route-status").text("");
     $("#start-route").prop("disabled", false);
   });
-
 
   // Battery cards: each bar animates up to its level
   function renderBatteries() {
