@@ -1,0 +1,53 @@
+/* CampusEco additive responsive + dark-mode layer, loaded AFTER portal CSS. */
+html { color-scheme: light; }
+body { min-width: 0; }
+header nav { flex-wrap: wrap; gap: .75rem 1.25rem; }
+header nav ul { flex-wrap: wrap; gap: .4rem 1.25rem; }
+.campuseco-theme-toggle { margin-left: auto; padding: .55rem .8rem; border: 1px solid #e4d9f2; border-radius: 8px; background: #fff; color: #4f2683; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.campuseco-theme-toggle:focus-visible { outline: 3px solid #febd11; outline-offset: 3px; }
+main, main section, .card { min-width: 0; }
+main img, main svg { max-width: 100%; }
+main input:not([type=checkbox]):not([type=radio]), main select, main textarea { max-width: 100%; box-sizing: border-box; }
+/* Tables retain column semantics and can be scrolled on narrow screens. */
+body:not(.tracking-portal) main table { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+body:not(.tracking-portal) main table thead, body:not(.tracking-portal) main table tbody { white-space: nowrap; }
+@media (max-width: 640px) {
+  header { padding: 12px 16px; }
+  header nav { align-items: flex-start; }
+  header nav ul { width: 100%; gap: .4rem .85rem; }
+  .campuseco-theme-toggle { margin-left: 0; }
+  main { padding: 16px; }
+  main form { padding: 16px; }
+  main form textarea { width: 100%; }
+  main a { max-width: 100%; }
+  .courier-toolbar, .courier-map-controls, .filter-actions, .modal-actions { flex-wrap: wrap; }
+  #package-modal { box-sizing: border-box; max-width: calc(100vw - 24px); }
+}
+/* Dark-mode overrides: scoped so existing light-mode styles remain unchanged. */
+html[data-theme="dark"] { color-scheme: dark; --purple: #b79be7; --purple-dark: #d1baf7; --gold: #febd11; --ink: #f2edf8; --muted: #c7bfd2; --page: #16131e; --card: #24202e; --line: #4c4359; --ok: #9ae5b0; --err: #ff9eae; --focus: #febd11; --shadow: 0 2px 12px rgba(0,0,0,.25); }
+html[data-theme="dark"] body, html[data-theme="dark"] body.tracking-portal { background: #16131e; color: #f2edf8; }
+html[data-theme="dark"] header, html[data-theme="dark"] .site-header { background: #321b54; }
+html[data-theme="dark"] footer, html[data-theme="dark"] .site-footer { background: #211b2b; color: #f2edf8; }
+html[data-theme="dark"] main h2, html[data-theme="dark"] .tracking-portal h2 { color: #d4bfff; }
+html[data-theme="dark"] main form, html[data-theme="dark"] .card, html[data-theme="dark"] .slide-panel, html[data-theme="dark"] .result-card, html[data-theme="dark"] .responsive-table tr, html[data-theme="dark"] .action-banner, html[data-theme="dark"] #package-search-form, html[data-theme="dark"] #package-modal, html[data-theme="dark"] .status-panel { background: #24202e; color: #f2edf8; border-color: #4c4359; }
+html[data-theme="dark"] table, html[data-theme="dark"] .tracking-portal table { background: #24202e; color: #f2edf8; }
+html[data-theme="dark"] th { background: #43266a; color: #fff; }
+html[data-theme="dark"] .tracking-portal th, html[data-theme="dark"] .tracking-portal .responsive-table thead th { background: #352946; color: #e9dbfa; }
+html[data-theme="dark"] td, html[data-theme="dark"] .kv-table td, html[data-theme="dark"] .kv-table th { border-color: #4c4359; }
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background: #302a3b; color: #fff; border-color: #81738f; }
+html[data-theme="dark"] input[readonly] { background: #393244; }
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: #c7bfd2; }
+html[data-theme="dark"] button:not(.campuseco-theme-toggle):not(.chip):not(.btn-secondary):not(.btn-link), html[data-theme="dark"] main a:not(.btn) { background: #68419a; color: #fff; }
+html[data-theme="dark"] .tracking-portal main a:not(.btn) { background: transparent; color: #d8bfff; }
+html[data-theme="dark"] .tracking-portal main a.btn { background: #68419a; color: #fff; }
+html[data-theme="dark"] .tracking-portal main a.btn-secondary, html[data-theme="dark"] .btn-secondary { background: #332943; color: #e9dbfa; }
+html[data-theme="dark"] .tracking-portal main a.btn-gold { background: #febd11; color: #1d1b24; }
+html[data-theme="dark"] .chip { background: #332943; color: #e9dbfa; border-color: #a78bd1; }
+html[data-theme="dark"] .chip[aria-pressed="true"] { background: #68419a; color: #fff; }
+html[data-theme="dark"] .campuseco-theme-toggle { background: #302a3b; color: #fff; border-color: #a78bd1; }
+html[data-theme="dark"] .notice { background: #40361f; color: #fff0c6; }
+html[data-theme="dark"] .hint, html[data-theme="dark"] .stat-label, html[data-theme="dark"] .kv-table th { color: #c7bfd2; }
+html[data-theme="dark"] .confirmation, html[data-theme="dark"] .toast { background: #173d2c; color: #c5f8d2; }
+html[data-theme="dark"] .badge, html[data-theme="dark"] .pill, html[data-theme="dark"] .count-badge { color: #1d1b24; }
+html[data-theme="dark"] .map-wrap { border-color: #4c4359; }
+html[data-theme="dark"] .progress { background: #41364d; }
