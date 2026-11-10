@@ -1,0 +1,224 @@
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.priority-urgent {
+  background-color: #fbe4e4;
+  color: #9b1c1c;
+}
+
+.priority-standard {
+  background-color: #ece4f6;
+  color: #4f2683;
+}
+
+.priority-low {
+  background-color: #eee;
+  color: #555;
+}
+
+.badge-checked-in {
+  background: #e8e6ee;
+  color: #3b3846;
+}
+.badge-awaiting-pickup {
+  background: #fff0c2;
+  color: #5c4300;
+}
+.badge-claimed {
+  background: #ffe9c7;
+  color: #6b3d00;
+}
+.badge-loaded {
+  background: #dce9fb;
+  color: #0f3c78;
+}
+.badge-en-route {
+  background: #e6dcf5;
+  color: #3a2264;
+}
+.badge-delivered {
+  background: #d9f0e1;
+  color: #0d4d29;
+}
+.badge-cancelled {
+  background: #f1f1f1;
+  color: #666;
+}
+
+tr[data-group="delivered"] {
+  color: #818080;
+}
+
+.package-filter-section {
+  margin: 1rem 0;
+}
+
+#toggle-package-filters {
+  margin-bottom: 0.5rem;
+}
+
+#package-search-form {
+  padding: 1rem;
+  border: 1px solid #d3cdcd;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+#package-search-form label {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+#package-search-form input,
+#package-search-form select {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.25rem;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#toggle-package-filters {
+  font: inherit;
+  font-size: inherit;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+/* =========================================
+   Operator Main - Package Modal
+   ========================================= */
+
+#package-modal {
+  box-sizing: border-box;
+  width: min(90%, 550px);
+  max-height: 85vh;
+  overflow-y: auto;
+  margin: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: white;
+  color: #222;
+}
+
+#package-modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+#package-modal h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #4f2683;
+}
+
+/* Override the global form styling */
+#package-modal form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  border-radius: 0;
+}
+
+#package-modal form label {
+  display: block;
+  font-weight: bold;
+  margin: 0;
+}
+
+#package-modal input,
+#package-modal select,
+#package-modal textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+  margin: 0 0 10px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+}
+
+#package-modal input[readonly] {
+  background-color: #eee;
+}
+
+#package-modal input:disabled,
+#package-modal select:disabled,
+#package-modal textarea:disabled {
+  background-color: #f1f1f1;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Measurement fields */
+#package-modal .measurement-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#package-modal .measurement-input input {
+  flex: 1;
+  min-width: 0;
+}
+
+#package-modal .measurement-input span {
+  white-space: nowrap;
+}
+
+/* Special instructions checkbox */
+#package-modal input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  justify-self: start;
+  margin: 5px 0 10px;
+}
+
+/* Modal buttons */
+#package-modal .modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+#package-modal [hidden] {
+  display: none !important;
+}
+
+/* Error messages */
+#package-modal .error-text,
+#package-modal #package-modal-error {
+  color: #b00040;
+  margin: 5px 0;
+}
+#package-modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(90%, 550px);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+#package-modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
