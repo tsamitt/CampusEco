@@ -1,15 +1,22 @@
 import OperatorPackageInput from "./pages/OperatorPackageInput";
 import OperatorMain from "./pages/OperatorMain";
+import TrackingMain from "./pages/TrackingMain";
+import TrackingDetail from "./pages/TrackingDetail";
+import TrackingPreferences from "./pages/TrackingPreferences";
+
+// Temporary routing: pick the page component from the last part of the URL path.
+// Anything not listed shows the operator dashboard (same default as before).
+const ROUTES = {
+  "operatorPackageInput.html": OperatorPackageInput,
+  "tracking.html": TrackingMain,
+  "trackingdetail.html": TrackingDetail,
+  "trackingpreferences.html": TrackingPreferences,
+};
 
 function App() {
-  const currentPage = window.location.pathname;
-  let page = null;
-  if (currentPage.endsWith("/operatorPackageInput.html")) {
-    page = <OperatorPackageInput />;
-  } else {
-    page = <OperatorMain />;
-    
-  }
+  const file = window.location.pathname.split("/").pop();
+  const Page = ROUTES[file] || OperatorMain;
+
   return (
     <>
       <header>
@@ -23,7 +30,7 @@ function App() {
         </nav>
       </header>
 
-      {page}
+      <Page />
 
       <footer>
         <p>&copy; 2026 Minnesota State University, Mankato</p>
