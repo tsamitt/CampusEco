@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+
 import "./../css/operator.css";
 
 export default function OperatorMain() {
@@ -17,6 +17,21 @@ export default function OperatorMain() {
     const [modalError, setModalError] = useState("");
 
     const CampusEco = window.CampusEco;
+    const dialogRef = useRef(null);
+
+    useEffect(() => {
+        const dialog = dialogRef.current;
+
+        if (selectedPackage && dialog && !dialog.open) {
+            dialog.showModal();
+        }
+
+        return () => {
+            if (dialog?.open) {
+                dialog.close();
+            }
+        };
+    }, [selectedPackage]);
 
     function refreshPackages() {
         setPackages(CampusEco.PackageStore.all());
@@ -158,16 +173,33 @@ export default function OperatorMain() {
                     <h2>Operators</h2>
 
                     {pendingBarcode && (
-                        <section className="action-banner" role="alert">
-                            <p>
+                        <section
+                            id="action-banner"
+                            className="action-banner"
+                            role="region"
+                            aria-live="polite"
+                        >
+                            <p id="action-banner-message">
                                 Are you sure you want to cancel package {pendingBarcode}?
                             </p>
-                            <button onClick={confirmCancellation}>
-                                Confirm Cancellation
-                            </button>
-                            <button onClick={() => setPendingBarcode(null)}>
-                                Dismiss
-                            </button>
+
+                            <div id="action-banner-buttons">
+                                <button
+                                    type="button"
+                                    id="confirm-action-button"
+                                    onClick={confirmCancellation}
+                                >
+                                    Confirm Cancellation
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="dismiss-action-button"
+                                    onClick={() => setPendingBarcode(null)}
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
                         </section>
                     )}
 
@@ -181,14 +213,19 @@ export default function OperatorMain() {
                         <div className="package-filter-section">
                             <button
                                 type="button"
+                                id="toggle-package-filters"
                                 aria-expanded={showFilters}
                                 onClick={() => setShowFilters(!showFilters)}
                             >
                                 {showFilters ? "Hide Filters ▲" : "Filter Packages ▼"}
                             </button>
 
-                            {showFilters && (
-                                <form onSubmit={(e) => e.preventDefault()}>
+                            <form
+                                id="package-search-form"
+                                className={showFilters ? "filters-open" : "filters-closed"}
+                                onSubmit={(e) => e.preventDefault()}
+                            >
+                                <div className="filter-content">
                                     <label htmlFor="package-search">
                                         Tracking Barcode
                                     </label>
@@ -234,8 +271,9 @@ export default function OperatorMain() {
                                             Clear Filters
                                         </button>
                                     </div>
-                                </form>
-                            )}
+                                </div>
+                            </form>
+
                         </div>
 
                         {filteredPackages.length === 0 && (
@@ -278,17 +316,17 @@ export default function OperatorMain() {
                                             </span>
                                         </td>
                                         <td>
-                                            <button onClick={() => openModal(pkg, "view")}>
-                                                View
-                                            </button>
-                                            <button onClick={() => openModal(pkg, "edit")}>
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => cancelPackage(pkg.barcode)}
-                                            >
-                                                Cancel
-                                            </button>
+                                            <div className="table-actions">
+                                                <button onClick={() => openModal(pkg, "view")}>
+                                                    View
+                                                </button>
+                                                <button onClick={() => openModal(pkg, "edit")}>
+                                                    Edit
+                                                </button>
+                                                <button onClick={() => cancelPackage(pkg.barcode)}>
+                                                    Cancel
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -316,19 +354,23 @@ export default function OperatorMain() {
                                         <td>{pkg.barcode}</td>
                                         <td>{pkg.building}</td>
                                         <td>{pkg.locker}</td>
-                                        <td>{pkg.status}</td>
+                                        <td>
+                                            <span className={`badge badge-${pkg.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                {pkg.status}
+                                            </span>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </section>
                 </section>
-            </main>
+            </main >
 
             {selectedPackage && (
                 <dialog
+                    ref={dialogRef}
                     id="package-modal"
-                    open
                     aria-labelledby="package-modal-title"
                     className="package-modal"
                 >
@@ -355,6 +397,12 @@ export default function OperatorMain() {
                             maxLength="2"
                             required
                         />
+
+                        {modalError && (
+                            <p id="package-modal-error" role="alert">
+                                {modalError}
+                            </p>
+                        )}
 
                         <label htmlFor="modal-locker">Delivery Locker Array</label>
                         <select
@@ -440,12 +488,6 @@ export default function OperatorMain() {
                             </div>
                         )}
 
-                        {modalError && (
-                            <p id="package-modal-error" role="alert">
-                                {modalError}
-                            </p>
-                        )}
-
                         <div className="modal-actions">
                             {modalMode === "edit" && (
                                 <button type="submit" id="modal-save-button">
@@ -463,7 +505,8 @@ export default function OperatorMain() {
                         </div>
                     </form>
                 </dialog>
-            )}
+            )
+            }
 
         </>
     );

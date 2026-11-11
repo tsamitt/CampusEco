@@ -222,3 +222,45 @@ tr[data-group="delivered"] {
 #package-modal::backdrop {
   background: rgb(0 0 0 / 55%);
 }
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+
+/* Package filter sliding animation */
+
+#package-search-form {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0;
+    margin-top: 0;
+
+    transition:
+        grid-template-rows 250ms ease,
+        opacity 250ms ease,
+        padding 250ms ease,
+        margin-top 250ms ease;
+}
+
+#package-search-form .filter-content {
+    min-height: 0;
+    overflow: hidden;
+}
+
+#package-search-form.filters-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+#package-search-form.filters-closed {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+}
