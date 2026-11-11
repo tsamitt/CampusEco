@@ -3,6 +3,9 @@ import OperatorMain from "./pages/OperatorMain";
 import TrackingMain from "./pages/TrackingMain";
 import TrackingDetail from "./pages/TrackingDetail";
 import TrackingPreferences from "./pages/TrackingPreferences";
+import CourierMain from "./pages/CourierMain";
+import CourierRegister from "./pages/CourierRegister";
+import CourierUpdate from "./pages/CourierUpdate";
 
 // Temporary routing: pick the page component from the last part of the URL path.
 // Anything not listed shows the operator dashboard (same default as before).
@@ -11,6 +14,9 @@ const ROUTES = {
   "tracking.html": TrackingMain,
   "trackingdetail.html": TrackingDetail,
   "trackingpreferences.html": TrackingPreferences,
+  "courier.html": CourierMain,
+  "courierRegister.html": CourierRegister,
+  "courierUpdate.html": CourierUpdate,
 };
 
 function App() {
