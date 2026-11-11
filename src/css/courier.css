@@ -35,6 +35,13 @@
   border-radius: 4px;
 }
 
+/* React: every page's CSS is bundled together, so undo the full-width
+   select rule from tracking.css inside the courier toolbar. */
+.courier-toolbar select {
+  width: auto;
+  min-height: 0;
+}
+
 .courier-toolbar input[type="search"] {
   min-width: 260px;
 }
@@ -148,6 +155,12 @@ tr.flash td {
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.25);
   overflow-y: auto;
   z-index: 100;
+  transition: right 0.3s ease;
+}
+
+/* React: the panel slides in when this class is added */
+.status-panel.is-open {
+  right: 0;
 }
 
 .status-panel h3 {
@@ -191,7 +204,7 @@ tr.flash td {
   width: 100%;
   max-width: 900px;
   aspect-ratio: 1532 / 717;
-  background: url("../map.png") no-repeat center / 100% 100%;
+  background: url("/map.png") no-repeat center / 100% 100%;
   border: 2px solid #4f2683;
   border-radius: 6px;
   overflow: hidden;
@@ -346,4 +359,51 @@ tr.flash td {
   height: 100%;
   width: 0;
   background-color: #d33;
+}
+
+/* React: animations that jQuery used to do (fadeOut, slideDown, fadeIn) */
+@keyframes courier-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes courier-pin-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: courier-slide-in 0.25s ease-out;
+}
+
+.map-pin {
+  animation: courier-pin-in 0.4s ease-out;
+}
+
+tr.fade-out td {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-panel,
+  tr.fade-out td {
+    transition: none;
+  }
+
+  .slide-in,
+  .map-pin,
+  tr.flash td {
+    animation: none;
+  }
 }
