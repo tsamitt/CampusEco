@@ -60,3 +60,19 @@ INSERT INTO PackageHistory (PackageId, Status, Timestamp, Location, Description)
 
 INSERT INTO Preferences (UserId, NotifyEmail, NotifyText, Phone, PreferredWindow, FallbackPreference, SignatureOnFile)
 VALUES (1, 1, 0, '', 'None', 'Hold', 0);
+
+-- Demo courier you can sign in as on courierRegister.html:
+--   email demo.courier@mnsu.edu   password courier123
+INSERT INTO Couriers (Id, Name, Email, PasswordHash, Shift, Role, RegisteredAt) VALUES
+  (1, 'Demo Courier', 'demo.courier@mnsu.edu',
+   'pbkdf2-sha256$100000$Q2FtcHVzRWNvRGVtb1NhbA==$p0H7Lmx/pymMg0D3mqDtauaAf6NFk6w7vNXIEvSnAUo=', -- hash of "courier123"
+   'Morning', 'Driver', UTC_TIMESTAMP(6) - INTERVAL 3 DAY);
+
+-- The packages that are already Loaded, En Route or Delivered belong to the demo courier.
+-- Package 5 is Loaded, so it also needs a cart.
+UPDATE Packages SET CartId = 1 WHERE Id = 5;
+
+INSERT INTO Claims (PackageId, CourierId, CartId, VerifiedWeightLb, ClaimedAt) VALUES
+  (2, 1, 4, 32.4, UTC_TIMESTAMP(6) - INTERVAL 45 MINUTE),
+  (3, 1, 2, 6.1,  UTC_TIMESTAMP(6) - INTERVAL 27 HOUR),
+  (5, 1, 1, 4.7,  UTC_TIMESTAMP(6) - INTERVAL 25 MINUTE);
