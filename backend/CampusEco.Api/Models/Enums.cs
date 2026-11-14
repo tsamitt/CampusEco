@@ -34,3 +34,23 @@ public enum LockerFallback
     Hold,
     Nearest
 }
+
+public enum CourierShift
+{
+    Morning,
+    Midday,
+    Afternoon
+}
+
+public enum CourierRole
+{
+    Driver,
+    Walker
+}
+
+public enum BatteryReportType
+{
+    Start,
+    Mid,
+    End
+}

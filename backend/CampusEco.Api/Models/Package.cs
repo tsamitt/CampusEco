@@ -27,4 +27,7 @@ public class Package
     public string SpecialInstructions { get; set; } = "";
 
     public ICollection<PackageHistory> History { get; set; } = new List<PackageHistory>();
+
+    // Courier who claimed this package (null while it waits in the route queue).
+    public Claim? Claim { get; set; }
 }
