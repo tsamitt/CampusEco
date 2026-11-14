@@ -1,0 +1,46 @@
+### Click "Send Request" above each block (VS Code "REST Client" extension, or Visual Studio).
+### Change the port if `dotnet run` prints a different one.
+@host = http://localhost:5080
+
+### Health: is the API up and connected to MySQL?
+GET {{host}}/api/health
+
+### All packages
+GET {{host}}/api/packages
+
+### Only packages that are En Route
+GET {{host}}/api/packages?status=EnRoute
+
+### One package
+GET {{host}}/api/packages/3141-5926-5358
+
+### Check in a new package (Operator)
+POST {{host}}/api/packages
+Content-Type: application/json
+
+{
+  "barcode": "9999-0000-1111",
+  "lockerId": "Locker Array 1",
+  "buildingCode": "ML",
+  "lengthIn": 12, "widthIn": 8, "heightIn": 6, "weightLb": 5,
+  "priority": "Standard"
+}
+
+### Update status (Courier)
+PATCH {{host}}/api/packages/9999-0000-1111/status
+Content-Type: application/json
+
+{ "status": "Loaded", "location": "Central Hub", "description": "Loaded onto Cart 1" }
+
+### Buildings and carts
+GET {{host}}/api/buildings
+###
+GET {{host}}/api/carts
+
+### Preferences (user 1)
+GET {{host}}/api/preferences/1
+###
+PUT {{host}}/api/preferences/1
+Content-Type: application/json
+
+{ "userId": 1, "notifyEmail": true, "notifyText": true, "phone": "507-555-0123", "preferredWindow": "Morning", "preferredBuildingCode": "ML", "fallbackPreference": "Nearest", "signatureOnFile": false }
