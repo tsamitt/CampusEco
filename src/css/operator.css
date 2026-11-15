@@ -250,6 +250,7 @@ tr[data-group="delivered"] {
 #package-search-form .filter-content {
     min-height: 0;
     overflow: hidden;
+    padding-left: 7px;
 }
 
 #package-search-form.filters-open {

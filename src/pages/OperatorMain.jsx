@@ -69,6 +69,7 @@ export default function OperatorMain() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState("");
+    const buildingInputRef = useRef(null);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -159,6 +160,12 @@ export default function OperatorMain() {
 
         if (!CampusEco.BUILDINGS[building]) {
             setModalError("Please enter a valid campus building code.");
+
+            buildingInputRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
             return;
         }
 
@@ -517,6 +524,7 @@ export default function OperatorMain() {
                         <label htmlFor="modal-building">Destination Building Code</label>
                         <input
                             id="modal-building"
+                            ref={buildingInputRef}
                             name="building"
                             value={formData.building}
                             onChange={handleFieldChange}
