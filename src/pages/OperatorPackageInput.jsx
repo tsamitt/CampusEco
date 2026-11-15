@@ -26,6 +26,9 @@ function OperatorPackageInput() {
 
     const [barcodeError, setBarcodeError] = useState("");
     const [buildingError, setBuildingError] = useState("");
+    const [submitError, setSubmitError] = useState("");
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Input References
 
@@ -34,12 +37,13 @@ function OperatorPackageInput() {
 
     // Form submission
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
 
         event.preventDefault();
 
         setBarcodeError("");
         setBuildingError("");
+        setSubmitError("");
 
         const formattedBarcode = barcode.trim();
         const formattedBuilding = building.trim().toUpperCase();
@@ -60,11 +64,13 @@ function OperatorPackageInput() {
             "locker-c": "Locker Array 3",
         }[locker];
 
-        const newPackage = new window.CampusEco.Package({
+        // Prepare the request expected by CreatePackageRequest.
+
+        const packageRequest = {
 
             barcode: formattedBarcode,
-            building: formattedBuilding,
-            locker: selectedLocker,
+            buildingCode: formattedBuilding,
+            lockerId: selectedLocker,
 
             lengthIn: Number(length),
             widthIn: Number(width),
@@ -75,37 +81,78 @@ function OperatorPackageInput() {
                 priority.charAt(0).toUpperCase() +
                 priority.slice(1).toLowerCase(),
 
-            status: "Checked In",
-            mine: true,
+            specialInstructions:
+                hasSpecialInstructions
+                    ? instructions.trim()
+                    : ""
 
-            history: [
-                {
-                    status: "Checked In",
-                    at: new Date().toISOString(),
+        };
+
+        setIsSubmitting(true);
+
+        try {
+
+            // Send package to the backend API.
+
+            const response = await fetch("http://localhost:5080/api/packages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
                 },
-            ],
+                body: JSON.stringify(packageRequest)
+            });
 
-        });
+            // Check for duplicate barcode.
 
-        newPackage.specialInstructions =
-            hasSpecialInstructions
-                ? instructions.trim()
-                : "";
+            if (response.status === 409) {
 
-        const saved = window.CampusEco.PackageStore.add(newPackage);
+                setBarcodeError(
+                    "A package with this tracking barcode already exists."
+                );
 
-        // Check for duplicate barcode
-        if (!saved) {
+                barcodeRef.current?.focus();
+                return;
+            }
 
-            setBarcodeError(
-                "A package with this tracking barcode already exists."
+            // Check for invalid building code.
+
+            if (response.status === 400) {
+
+                const errorData = await response.json();
+
+                setBuildingError(
+                    errorData.error ||
+                    "The package information provided is invalid."
+                );
+
+                return;
+            }
+
+            // Handle other unsuccessful responses.
+
+            if (!response.ok) {
+                throw new Error(
+                    "Unable to save package. Please try again."
+                );
+            }
+
+            // Package successfully saved to the database.
+
+            window.location.href = "/operatorMain.html";
+
+        } catch (error) {
+
+            console.error("Package submission failed:", error);
+
+            setSubmitError(
+                "Unable to check in package. Please try again."
             );
 
-            barcodeRef.current?.focus();
-            return;
-        }
+        } finally {
 
-        window.location.href = "/operatorMain.html";
+            setIsSubmitting(false);
+
+        }
     }
 
 
@@ -361,12 +408,18 @@ function OperatorPackageInput() {
 
                     )}
 
+                    {submitError && (
+                        <p className="feedback error" role="alert">
+                            {submitError}
+                        </p>
+                    )}
+
                     <br />
 
                     {/* Submit Button */}
 
-                    <button type="submit">
-                        Check Package In
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Checking In..." : "Check Package In"}
                     </button>
 
                 </form>

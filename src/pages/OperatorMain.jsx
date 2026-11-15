@@ -206,7 +206,7 @@ export default function OperatorMain() {
                     <section>
                         <h3>Package Activity</h3>
 
-                        <a href="/operatorPackageInput">
+                        <a href="/operatorPackageInput.html">
                             Check In New Package
                         </a>
 
