@@ -149,7 +149,7 @@ export default function OperatorMain() {
         }));
     }
 
-    function savePackage(event) {
+    async function savePackage(event) {
         event.preventDefault();
 
         if (!selectedPackage || modalMode !== "edit") return;
@@ -161,28 +161,54 @@ export default function OperatorMain() {
             return;
         }
 
-        const pkg = CampusEco.PackageStore.find(selectedPackage.barcode);
+        const priorityValues = {
+            Low: 0,
+            Standard: 1,
+            Urgent: 2
+        };
 
-        if (!pkg) {
-            setModalError("Package could not be found. Please refresh.");
-            return;
+        const updatedPackage = {
+            buildingCode: building,
+            lockerId: formData.locker,
+            lengthIn: Number(formData.length),
+            widthIn: Number(formData.width),
+            heightIn: Number(formData.height),
+            weightLb: Number(formData.weight),
+            priority: priorityValues[formData.priority],
+            specialInstructions: formData.hasInstructions
+                ? formData.specialInstructions.trim()
+                : ""
+        };
+
+        try {
+            const response = await fetch(
+                `http://localhost:5080/api/packages/${encodeURIComponent(selectedPackage.barcode)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(updatedPackage)
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+
+                throw new Error(
+                    errorData.error ||
+                    errorData.title ||
+                    "Unable to update package."
+                );
+            }
+
+            closeModal();
+            await refreshPackages();
+
+        } catch (error) {
+            console.error("Error updating package:", error);
+            setModalError(error.message);
         }
-
-        pkg.building = building;
-        pkg.locker = formData.locker;
-        pkg.lengthIn = Number(formData.length);
-        pkg.widthIn = Number(formData.width);
-        pkg.heightIn = Number(formData.height);
-        pkg.weightLb = Number(formData.weight);
-        pkg.priority = formData.priority;
-        pkg.specialInstructions = formData.hasInstructions
-            ? formData.specialInstructions.trim()
-            : "";
-
-        CampusEco.PackageStore.save(pkg);
-
-        closeModal();
-        refreshPackages();
     }
 
     function cancelPackage(barcode) {

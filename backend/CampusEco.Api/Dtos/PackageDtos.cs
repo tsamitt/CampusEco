@@ -72,6 +72,31 @@ public class CreatePackageRequest
     [StringLength(500)] public string SpecialInstructions { get; set; } = "";
 }
 
+public class UpdatePackageRequest
+{
+    [Required, StringLength(40)]
+    public string LockerId { get; set; } = "";
+
+    [Required, RegularExpression(@"^[A-Za-z]{2}$")]
+    public string BuildingCode { get; set; } = "";
+
+    [Range(0, 200)]
+    public double LengthIn { get; set; }
+
+    [Range(0, 200)]
+    public double WidthIn { get; set; }
+
+    [Range(0, 200)]
+    public double HeightIn { get; set; }
+
+    [Range(0, 500)]
+    public double WeightLb { get; set; }
+
+    public PackagePriority Priority { get; set; }
+
+    [StringLength(500)]
+    public string SpecialInstructions { get; set; } = "";
+}
 public class UpdateStatusRequest
 {
     [Required] public PackageStatus? Status { get; set; }

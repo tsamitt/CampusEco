@@ -82,6 +82,40 @@ public class PackagesController : ControllerBase
         return CreatedAtAction(nameof(Get), new { barcode = pkg.Barcode }, PackageDto.From(created));
     }
 
+    // PUT /api/packages/3141-5926-5358
+    [HttpPut("{barcode}")]
+    public async Task<ActionResult<PackageDto>> Update(
+        string barcode,
+        UpdatePackageRequest request)
+    {
+        var pkg = await WithDetails()
+            .FirstOrDefaultAsync(p => p.Barcode == barcode);
+
+        if (pkg is null)
+            return NotFound(new { error = "No such package" });
+
+        var code = request.BuildingCode.Trim().ToUpperInvariant();
+
+        if (!await _db.Buildings.AnyAsync(b => b.Code == code))
+            return BadRequest(new { error = "Unknown building code " + code });
+
+        pkg.BuildingCode = code;
+        pkg.LockerId = request.LockerId;
+        pkg.LengthIn = request.LengthIn;
+        pkg.WidthIn = request.WidthIn;
+        pkg.HeightIn = request.HeightIn;
+        pkg.WeightLb = request.WeightLb;
+        pkg.Priority = request.Priority;
+        pkg.SpecialInstructions = request.SpecialInstructions;
+
+        await _db.SaveChangesAsync();
+
+        var updated = await WithDetails()
+            .FirstAsync(p => p.Id == pkg.Id);
+
+        return PackageDto.From(updated);
+    }
+
     // PATCH /api/packages/3141-5926-5358/status   body: { "status": "Delivered" }
     [HttpPatch("{barcode}/status")]
     public async Task<ActionResult<PackageDto>> UpdateStatus(string barcode, UpdateStatusRequest request)
