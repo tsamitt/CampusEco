@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import "../css/courier.css";
-const { CourierStore, EcoCourier } = window.CampusEcoCourier;
+import { clearSignedInId, courierApi, loadSignedInCourier, setSignedInId } from "../Api/courierApi.js";
+import { ApiError, useApiData } from "./CourierShared.jsx";
 
 // Password strength labels and colors, from score 0 to 5.
 const STRENGTH = [
@@ -11,6 +12,16 @@ const STRENGTH = [
   { label: "Strong", color: "#2e9e45" },
   { label: "Very strong", color: "#2e9e45" },
 ];
+
+// How much each kind of courier can carry (the API checks this again when claiming).
+const ROLES = {
+  Driver: { label: "Delivery Driver", maxLoadLb: 150 },
+  Walker: { label: "Walking Courier", maxLoadLb: 25 },
+};
+
+function isMnsuEmail(email) {
+  return /^[^\s@]+@mnsu\.edu$/i.test(String(email));
+}
 
 // Scores a password from 0 to 5.
 function scorePassword(pw) {
@@ -23,30 +34,38 @@ function scorePassword(pw) {
   return score;
 }
 
-// Courier account registration (formerly courierRegister.html + courierRegister.js).
+// Courier account registration and sign in (formerly courierRegister.html + courierRegister.js).
 export default function CourierRegister() {
   const C = window.CampusEco;
-  const [courier, setCourier] = useState(() => CourierStore.loadCourier());
+  const signedIn = useApiData(loadSignedInCourier);
+  const courier = signedIn.data;
 
-  // Form fields
+  // Registration form fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [shift, setShift] = useState("");
   const [role, setRole] = useState("");
+  const [registerError, setRegisterError] = useState("");
+  const [saving, setSaving] = useState(false);
   const emailRef = useRef(null);
 
   // After a successful registration the form is swapped for a success message.
   const [successText, setSuccessText] = useState("");
 
+  // Sign in form fields
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
+  const [signInError, setSignInError] = useState("");
+
   // Email: custom rule on top of type="email" (must be an @mnsu.edu address)
   const trimmedEmail = email.trim();
-  const emailOk = trimmedEmail === "" || EcoCourier.isMnsuEmail(trimmedEmail);
+  const emailOk = trimmedEmail === "" || isMnsuEmail(trimmedEmail);
 
   function changeEmail(event) {
     const value = event.target.value;
-    const ok = value.trim() === "" || EcoCourier.isMnsuEmail(value.trim());
+    const ok = value.trim() === "" || isMnsuEmail(value.trim());
     event.target.setCustomValidity(ok ? "" : "Please use your @mnsu.edu email address.");
     setEmail(value);
   }
@@ -56,11 +75,7 @@ export default function CourierRegister() {
   const strengthText = password.length < 8 ? "At least 8 characters" : STRENGTH[score].label;
 
   // Role hint: how much this kind of courier can carry
-  let roleHint = "";
-  if (role) {
-    const sample = new EcoCourier({ role });
-    roleHint = sample.roleLabel + "s can carry up to " + sample.maxLoadLb + " lb per load.";
-  }
+  const roleHint = role ? ROLES[role].label + "s can carry up to " + ROLES[role].maxLoadLb + " lb per load." : "";
 
   function resetForm() {
     setName("");
@@ -69,34 +84,69 @@ export default function CourierRegister() {
     setShowPassword(false);
     setShift("");
     setRole("");
+    setRegisterError("");
     if (emailRef.current) emailRef.current.setCustomValidity("");
   }
 
-  // Submit: create and save the EcoCourier
-  function handleSubmit(event) {
+  // Submit: create the courier account in the database
+  async function handleSubmit(event) {
     event.preventDefault(); // stay on the page. The browser already checked the required fields.
+    setRegisterError("");
+    setSaving(true);
 
-    const newCourier = new EcoCourier({
-      name: name.trim(),
-      email: trimmedEmail.toLowerCase(),
-      shift,
-      role,
-    });
-    CourierStore.saveCourier(newCourier);
+    let newCourier;
+    try {
+      newCourier = await courierApi.register({
+        name: name.trim(),
+        email: trimmedEmail.toLowerCase(),
+        password,
+        shift,
+        role,
+      });
+    } catch (err) {
+      setSaving(false);
+      setRegisterError(err.message);
+      return;
+    }
 
+    setSaving(false);
+    setSignedInId(newCourier.id);
     setSuccessText(
-      "Welcome, " + newCourier.firstName + "! You're registered as a " + newCourier.roleLabel +
-        " on the " + newCourier.shift + " shift.",
+      "Welcome, " + newCourier.name.split(" ")[0] + "! You're registered as a " + newCourier.roleLabel +
+        " on the " + newCourier.shift.toLowerCase() + " shift.",
     );
-    setCourier(CourierStore.loadCourier());
+    setPassword(""); // don't keep the password in memory
+    signedIn.reload();
+  }
+
+  // Sign in to an account that already exists
+  async function handleSignIn(event) {
+    event.preventDefault();
+    setSignInError("");
+    setSaving(true);
+
+    let found;
+    try {
+      found = await courierApi.signIn(signInEmail.trim(), signInPassword);
+    } catch (err) {
+      setSaving(false);
+      setSignInError(err.message);
+      return;
+    }
+
+    setSaving(false);
+    setSignedInId(found.id);
+    setSignInEmail("");
+    setSignInPassword("");
+    signedIn.reload();
   }
 
   // Sign out
   function signOut() {
-    CourierStore.clearCourier();
+    clearSignedInId();
     resetForm();
     setSuccessText("");
-    setCourier(null);
+    signedIn.reload();
   }
 
   return (
@@ -106,7 +156,9 @@ export default function CourierRegister() {
 
         <a href="courier.html">Back to Courier Dashboard</a>
 
-        {/* Shown when a courier is already registered on this device */}
+        <ApiError message={signedIn.error} onRetry={signedIn.reload} />
+
+        {/* Shown when a courier is signed in on this device */}
         <div id="current-courier" className="form-message is-success slide-in" hidden={!courier}>
           <span id="current-courier-text">
             {courier ? "Signed in as " + courier.name + " (" + courier.email + "). " : ""}
@@ -178,9 +230,9 @@ export default function CourierRegister() {
             <label htmlFor="reg-shift">Preferred Shift *</label>
             <select id="reg-shift" name="reg-shift" required value={shift} onChange={(e) => setShift(e.target.value)}>
               <option value="">Select a shift</option>
-              <option value="morning">Morning</option>
-              <option value="midday">Midday</option>
-              <option value="afternoon">Afternoon</option>
+              <option value="Morning">Morning</option>
+              <option value="Midday">Midday</option>
+              <option value="Afternoon">Afternoon</option>
             </select>
 
             <fieldset>
@@ -189,9 +241,9 @@ export default function CourierRegister() {
                 <input
                   type="radio"
                   name="role"
-                  value="driver"
+                  value="Driver"
                   required
-                  checked={role === "driver"}
+                  checked={role === "Driver"}
                   onChange={(e) => setRole(e.target.value)}
                 />{" "}
                 Delivery Driver
@@ -200,8 +252,8 @@ export default function CourierRegister() {
                 <input
                   type="radio"
                   name="role"
-                  value="walker"
-                  checked={role === "walker"}
+                  value="Walker"
+                  checked={role === "Walker"}
                   onChange={(e) => setRole(e.target.value)}
                 />{" "}
                 Walking Courier
@@ -211,7 +263,13 @@ export default function CourierRegister() {
               {roleHint}
             </span>
 
-            <button type="submit">Register</button>
+            <button type="submit" disabled={saving}>
+              Register
+            </button>
+
+            <div className="form-message is-error" role="alert" hidden={!registerError}>
+              {registerError}
+            </div>
           </form>
         </section>
 
@@ -219,6 +277,44 @@ export default function CourierRegister() {
         <section id="register-success" className="form-message is-success slide-in" hidden={successText === ""}>
           <p id="register-success-text">{successText}</p>
           <a href="courier.html">Go to Courier Dashboard</a>
+        </section>
+
+        {/* Sign in with an account that already exists (hidden while signed in) */}
+        <section id="signin-section" hidden={!!courier}>
+          <h3>Already Registered? Sign In</h3>
+
+          <form id="signin-form" onSubmit={handleSignIn}>
+            <label htmlFor="signin-email">Email Address *</label>
+            <input
+              type="email"
+              id="signin-email"
+              name="signin-email"
+              placeholder="name@mnsu.edu"
+              autoComplete="username"
+              required
+              value={signInEmail}
+              onChange={(e) => setSignInEmail(e.target.value)}
+            />
+
+            <label htmlFor="signin-password">Password *</label>
+            <input
+              type="password"
+              id="signin-password"
+              name="signin-password"
+              autoComplete="current-password"
+              required
+              value={signInPassword}
+              onChange={(e) => setSignInPassword(e.target.value)}
+            />
+
+            <button type="submit" disabled={saving}>
+              Sign In
+            </button>
+
+            <div className="form-message is-error" role="alert" hidden={!signInError}>
+              {signInError}
+            </div>
+          </form>
         </section>
       </section>
     </main>

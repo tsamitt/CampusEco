@@ -1,14 +1,23 @@
 import { useEffect, useState } from "react";
 import "../css/courier.css";
-const { CourierStore, Dispatch, EcoCart, isValidBarcode } = window.CampusEcoCourier;
-import { BatteryBar, FormMessage, cartLabel, useFlashMessage, useStoreRefresh } from "./CourierShared.jsx";
+import { courierApi, loadSignedInCourier } from "../Api/courierApi";
+import {
+  ApiError,
+  BatteryBar,
+  FormMessage,
+  cartLabel,
+  isValidBarcode,
+  useApiData,
+  useFlashMessage,
+  usePackageLookup,
+} from "./CourierShared.jsx";
 
 const STATUS_OPTIONS = ["Loaded", "En Route", "Delivered"];
 
 const REPORT_TYPES = [
-  { value: "start", label: "Start of shift" },
-  { value: "mid", label: "Mid-shift" },
-  { value: "end", label: "End of shift" },
+  { value: "Start", label: "Start of shift" },
+  { value: "Mid", label: "Mid-shift" },
+  { value: "End", label: "End of shift" },
 ];
 
 const ISSUES = [
@@ -17,22 +26,41 @@ const ISSUES = [
   { value: "warning", label: "Warning light on" },
 ];
 
+// Same colour rule the API uses for a cart's battery.
+function batteryState(level) {
+  if (level < 20) return "critical";
+  if (level < 50) return "low";
+  return "good";
+}
+
+// Loads what the three forms need from the API.
+async function loadUpdatePage() {
+  const [courier, queue, carts] = await Promise.all([
+    loadSignedInCourier(),
+    courierApi.queue(),
+    courierApi.carts(),
+  ]);
+  const mine = courier ? await courierApi.deliveries(courier.id) : [];
+  return { courier, queue, carts, mine };
+}
+
 // Claim, transit milestone and battery forms (formerly courierUpdate.html + courierUpdate.js).
 export default function CourierUpdate() {
   const C = window.CampusEco;
-  const [, refresh] = useStoreRefresh();
+  const { loading, error, data, reload } = useApiData(loadUpdatePage);
 
-  // Suggestions and dropdowns built from the current data
-  const queue = Dispatch.queue();
-  const activeStops = Dispatch.activeStops();
-  const carts = CourierStore.carts();
+  const courier = data ? data.courier : null;
+  const queue = data ? data.queue : [];
+  const carts = data ? data.carts : [];
+  const mine = data ? data.mine : [];
 
-  // The dashboard links to #battery-form; scroll there once the page has rendered.
+  // The dashboard links to #battery-form; scroll there once the page has loaded.
   useEffect(() => {
+    if (loading) return;
     const hash = window.location.hash.slice(1);
     const target = hash && document.getElementById(hash);
     if (target) target.scrollIntoView();
-  }, []);
+  }, [loading]);
 
   return (
     <main>
@@ -41,34 +69,55 @@ export default function CourierUpdate() {
 
         <a href="courier.html">Back to Courier Dashboard</a>
 
-        <ClaimForm C={C} queue={queue} carts={carts} onSaved={refresh} />
-        <StatusForm C={C} activeStops={activeStops} onSaved={refresh} />
-        <BatteryForm C={C} carts={carts} onSaved={refresh} />
+        <p className="courier-greeting">
+          {loading ? (
+            "Loading..."
+          ) : courier ? (
+            "Signed in as " + courier.name + " (" + courier.roleLabel + ")"
+          ) : (
+            <>
+              You are not signed in. <a href="courierRegister.html">Register or sign in</a> to claim and update
+              deliveries.
+            </>
+          )}
+        </p>
+
+        <ApiError message={error} onRetry={reload} />
+
+        <ClaimForm C={C} courier={courier} queue={queue} carts={carts} onSaved={reload} />
+        <StatusForm courier={courier} mine={mine} onSaved={reload} />
+        <BatteryForm C={C} courier={courier} carts={carts} onSaved={reload} />
       </section>
     </main>
   );
 }
 
 // 1. Claim a Delivery
-function ClaimForm({ C, queue, carts, onSaved }) {
+function ClaimForm({ C, courier, queue, carts, onSaved }) {
   const [barcode, setBarcode] = useState("");
   const [cartId, setCartId] = useState("");
   const [weight, setWeight] = useState("");
   const [confirmed, setConfirmed] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, showMessage] = useFlashMessage(4000);
 
-  // Looks the barcode up as it is typed.
+  // Looks the barcode up as it is typed: first in the route queue, then in the API.
   const trimmed = barcode.trim();
+  const queued = queue.find((p) => p.barcode === trimmed) || null;
+  const lookup = usePackageLookup(queued ? "" : trimmed);
+
   let info = "";
-  if (isValidBarcode(trimmed)) {
-    const pkg = C.PackageStore.find(trimmed);
-    if (!pkg) {
-      info = "No package with that barcode is checked in at the hub.";
-    } else if (!Dispatch.isQueued(pkg)) {
-      info = "Not in the route queue (" + Dispatch.displayStatus(pkg) + ").";
-    } else {
-      info = pkg.building + ", " + pkg.locker + " - " + pkg.priority + " - hub weight " + pkg.weightLb + " lb";
-    }
+  if (queued) {
+    info = queued.buildingCode + ", " + queued.lockerId + " - " + queued.priority + " - hub weight " + queued.weightLb + " lb";
+  } else if (lookup && lookup.loading) {
+    info = "Looking up " + trimmed + "...";
+  } else if (lookup && lookup.error) {
+    info = lookup.error;
+  } else if (lookup && !lookup.pkg) {
+    info = "No package with that barcode is checked in at the hub.";
+  } else if (lookup && lookup.pkg) {
+    const atHub = lookup.pkg.status === "Checked In" || lookup.pkg.status === "Awaiting Pickup";
+    info = "Not in the route queue (" + (atHub ? "already claimed" : lookup.pkg.status) + ").";
   }
 
   // Keep the barcode in the XXXX-XXXX-XXXX format and pre-fill the hub weight.
@@ -76,8 +125,8 @@ function ClaimForm({ C, queue, carts, onSaved }) {
     const formatted = C.formatBarcode(event.target.value);
     setBarcode(formatted);
     if (isValidBarcode(formatted)) {
-      const pkg = C.PackageStore.find(formatted);
-      if (pkg && Dispatch.isQueued(pkg)) setWeight(String(pkg.weightLb));
+      const pkg = queue.find((p) => p.barcode === formatted);
+      if (pkg) setWeight(String(pkg.weightLb));
     }
   }
 
@@ -88,18 +137,25 @@ function ClaimForm({ C, queue, carts, onSaved }) {
     setConfirmed(false);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault(); // stay on the page. The browser already checked required and pattern.
-    let pkg;
+    if (!courier) {
+      showMessage("Register or sign in as a courier before claiming a delivery.", "error");
+      return;
+    }
 
+    setSaving(true);
+    let pkg;
     try {
-      pkg = Dispatch.claim(trimmed, cartId, parseFloat(weight));
+      pkg = await courierApi.claim(courier.id, trimmed, Number(cartId), parseFloat(weight));
     } catch (err) {
+      setSaving(false);
       showMessage(err.message, "error");
       return;
     }
 
-    showMessage("Claimed " + trimmed + " for " + pkg.building + " on " + cartId + ".");
+    setSaving(false);
+    showMessage("Claimed " + trimmed + " for " + pkg.buildingCode + " on " + pkg.cartName + ".");
     clear();
     onSaved();
   }
@@ -129,7 +185,7 @@ function ClaimForm({ C, queue, carts, onSaved }) {
           <datalist id="queue-barcodes">
             {queue.map((pkg) => (
               <option key={pkg.barcode} value={pkg.barcode}>
-                {pkg.building + " - " + pkg.priority}
+                {pkg.buildingCode + " - " + pkg.priority}
               </option>
             ))}
           </datalist>
@@ -144,7 +200,7 @@ function ClaimForm({ C, queue, carts, onSaved }) {
             <option value="">Select a cart</option>
             {/* A cart that needs charging can't be claimed with. */}
             {carts.map((cart) => (
-              <option key={cart.id} value={cart.id} disabled={cart.needsCharge}>
+              <option key={cart.id} value={String(cart.id)} disabled={cart.needsCharge}>
                 {cartLabel(cart)}
               </option>
             ))}
@@ -181,7 +237,10 @@ function ClaimForm({ C, queue, carts, onSaved }) {
         </div>
 
         <div>
-          <button type="submit">Claim Delivery</button> <button type="reset">Clear</button>
+          <button type="submit" disabled={saving}>
+            Claim Delivery
+          </button>{" "}
+          <button type="reset">Clear</button>
         </div>
 
         <FormMessage id="claim-message" message={message} />
@@ -191,46 +250,59 @@ function ClaimForm({ C, queue, carts, onSaved }) {
 }
 
 // 2. Update Transit Milestone
-function StatusForm({ C, activeStops, onSaved }) {
+function StatusForm({ courier, mine, onSaved }) {
+  const C = window.CampusEco;
   const [barcode, setBarcode] = useState("");
   const [status, setStatus] = useState("");
   const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
   const [message, showMessage] = useFlashMessage(4000);
 
   // Only enable the statuses that make sense for the typed barcode.
   const trimmed = barcode.trim();
-  const pkg = isValidBarcode(trimmed) ? C.PackageStore.find(trimmed) : null;
+  const delivery = mine.find((p) => p.barcode === trimmed) || null;
+  // Not one of this courier's deliveries: ask the API whether the package exists at all.
+  const lookup = usePackageLookup(delivery || !courier ? "" : trimmed);
+
   let allowed = STATUS_OPTIONS;
   let info = "";
-
-  if (!pkg) {
-    info = isValidBarcode(trimmed) ? "No package with that barcode." : "";
-  } else if (!Dispatch.isMine(pkg)) {
+  if (delivery) {
+    allowed = delivery.nextStatuses;
+    info = "Current status: " + delivery.displayStatus + (allowed.length ? "" : " (complete)");
+  } else if (isValidBarcode(trimmed)) {
     allowed = [];
-    info = "Claim this package before updating its status.";
-  } else {
-    allowed = Dispatch.nextStatuses(pkg);
-    info = "Current status: " + Dispatch.displayStatus(pkg) + (allowed.length ? "" : " (complete)");
+    if (!courier) info = "Sign in as a courier to update your deliveries.";
+    else if (!lookup || lookup.loading) info = "Looking up " + trimmed + "...";
+    else if (lookup.error) info = lookup.error;
+    else if (!lookup.pkg) info = "No package with that barcode.";
+    else info = "Claim this package before updating its status.";
   }
 
   // A choice that is no longer allowed for this barcode is cleared.
   const chosen = allowed.indexOf(status) !== -1 ? status : "";
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
+    if (!courier) {
+      showMessage("Register or sign in as a courier first.", "error");
+      return;
+    }
     if (!chosen) {
       showMessage("Pick a new status.", "error");
       return;
     }
 
+    setSaving(true);
     try {
-      Dispatch.updateStatus(trimmed, chosen, notes.trim());
+      await courierApi.updateStatus(courier.id, trimmed, chosen, notes.trim());
     } catch (err) {
+      setSaving(false);
       showMessage(err.message, "error");
       return;
     }
 
+    setSaving(false);
     showMessage(trimmed + ' updated to "' + chosen + '".');
     setBarcode("");
     setStatus("");
@@ -259,13 +331,15 @@ function StatusForm({ C, activeStops, onSaved }) {
           value={barcode}
           onChange={(e) => setBarcode(C.formatBarcode(e.target.value))}
         />
-        {/* Barcodes you have claimed */}
+        {/* Your deliveries that can still move forward */}
         <datalist id="my-barcodes">
-          {activeStops.map((p) => (
-            <option key={p.barcode} value={p.barcode}>
-              {p.building + " - " + Dispatch.displayStatus(p)}
-            </option>
-          ))}
+          {mine
+            .filter((p) => p.nextStatuses.length > 0)
+            .map((p) => (
+              <option key={p.barcode} value={p.barcode}>
+                {p.buildingCode + " - " + p.displayStatus}
+              </option>
+            ))}
         </datalist>
         <span id="status-info" className="field-hint">
           {info}
@@ -302,7 +376,9 @@ function StatusForm({ C, activeStops, onSaved }) {
           {notes.length} / 250
         </span>
 
-        <button type="submit">Update Status</button>
+        <button type="submit" disabled={saving}>
+          Update Status
+        </button>
 
         <FormMessage id="status-message" message={message} />
       </form>
@@ -311,19 +387,20 @@ function StatusForm({ C, activeStops, onSaved }) {
 }
 
 // 3. Report Battery Status
-function BatteryForm({ C, carts, onSaved }) {
+function BatteryForm({ C, courier, carts, onSaved }) {
   const [cartId, setCartId] = useState("");
   const [level, setLevel] = useState("");
   const [touched, setTouched] = useState(false);
   const [previewState, setPreviewState] = useState("good");
   const [reportType, setReportType] = useState("");
   const [issues, setIssues] = useState([]);
+  const [saving, setSaving] = useState(false);
   const [message, showMessage] = useFlashMessage(4000);
 
   // Shows the cart's last report when one is picked.
-  const selectedCart = carts.find((cart) => cart.id === cartId) || null;
+  const selectedCart = carts.find((cart) => String(cart.id) === cartId) || null;
   const lastReport = selectedCart
-    ? "Last report: " + selectedCart.batteryPct + "% (" + C.formatDateTime(selectedCart.lastReportAt) + ")"
+    ? "Last report: " + selectedCart.batteryPercentage + "% (" + C.formatDateTime(selectedCart.lastReportAt) + ")"
     : "";
 
   // Live preview of the battery bar while typing.
@@ -340,9 +417,7 @@ function BatteryForm({ C, carts, onSaved }) {
     setTouched(true);
 
     if (raw === "" || value < 0 || value > 100) return;
-
-    // Re-use the EcoCart model to decide the colour.
-    setPreviewState(new EcoCart({ id: "preview", batteryPct: value }).batteryState);
+    setPreviewState(batteryState(value));
 
     // Below 20% the cart needs charging, so tick that box for the courier.
     if (value < 20) setIssues((list) => (list.indexOf("charge") === -1 ? list.concat("charge") : list));
@@ -352,22 +427,28 @@ function BatteryForm({ C, carts, onSaved }) {
     setIssues((list) => (checked ? list.concat(value) : list.filter((v) => v !== value)));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    let cart;
 
+    setSaving(true);
+    let cart;
     try {
-      // Keep the issues in the same order as the checkboxes.
-      const ordered = ISSUES.map((i) => i.value).filter((v) => issues.indexOf(v) !== -1);
-      cart = Dispatch.reportBattery(cartId, level, reportType, ordered);
+      cart = await courierApi.reportBattery(Number(cartId), {
+        batteryPercentage: levelNumber,
+        reportType,
+        issues,
+        courierId: courier ? courier.id : null,
+      });
     } catch (err) {
+      setSaving(false);
       showMessage(err.message, "error");
       return;
     }
 
+    setSaving(false);
     const warning = cart.needsCharge ? " This cart is now marked as needing a charge." : "";
     showMessage(
-      cart.id + " battery saved at " + cart.batteryPct + "%." + warning,
+      cart.name + " battery saved at " + cart.batteryPercentage + "%." + warning,
       cart.needsCharge ? "error" : "success",
     );
 
@@ -392,7 +473,7 @@ function BatteryForm({ C, carts, onSaved }) {
         <select id="battery-cart" name="battery-cart" required value={cartId} onChange={(e) => setCartId(e.target.value)}>
           <option value="">Select a cart</option>
           {carts.map((cart) => (
-            <option key={cart.id} value={cart.id}>
+            <option key={cart.id} value={String(cart.id)}>
               {cartLabel(cart)}
             </option>
           ))}
@@ -452,7 +533,9 @@ function BatteryForm({ C, carts, onSaved }) {
           ))}
         </fieldset>
 
-        <button type="submit">Submit Report</button>
+        <button type="submit" disabled={saving}>
+          Submit Report
+        </button>
 
         <FormMessage id="battery-message" message={message} />
       </form>

@@ -1,14 +1,15 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import "../css/courier.css";
-const { CourierStore, Dispatch, resetCourierDemo } = window.CampusEcoCourier;
+import { courierApi, loadSignedInCourier } from "../Api/courierApi";
 import {
+  ApiError,
   BatteryBar,
   FormMessage,
   PriorityBadge,
   StatusBadge,
   cartLabel,
+  useApiData,
   useFlashMessage,
-  useStoreRefresh,
 } from "./CourierShared.jsx";
 
 const SEGMENT_MS = 350; // time for the cart to drive between two waypoints
@@ -18,19 +19,32 @@ function percent(value, total) {
   return (value / total) * 100 + "%";
 }
 
+// Loads everything the dashboard shows from the API in one go.
+async function loadDashboard() {
+  const [courier, queue, carts] = await Promise.all([
+    loadSignedInCourier(),
+    courierApi.queue(),
+    courierApi.carts(),
+  ]);
+  const mine = courier ? await courierApi.deliveries(courier.id) : [];
+  return { courier, queue, carts, mine };
+}
+
 // Groups the active deliveries by building, so two packages for the same
-// building become one stop. activeStops() is already sorted most urgent
-// first, so each stop keeps the position of its most urgent package.
-function groupStopsByBuilding() {
+// building become one stop. The API sends deliveries most urgent first, so
+// each stop keeps the position of its most urgent package.
+function groupStopsByBuilding(mine) {
   const stops = [];
-  Dispatch.activeStops().forEach((pkg) => {
-    let stop = stops.find((s) => s.building === pkg.building);
-    if (!stop) {
-      stop = { building: pkg.building, name: pkg.buildingName, packages: [] };
-      stops.push(stop);
-    }
-    stop.packages.push(pkg);
-  });
+  mine
+    .filter((pkg) => pkg.group === "active")
+    .forEach((pkg) => {
+      let stop = stops.find((s) => s.building === pkg.buildingCode);
+      if (!stop) {
+        stop = { building: pkg.buildingCode, name: pkg.buildingName, packages: [] };
+        stops.push(stop);
+      }
+      stop.packages.push(pkg);
+    });
   return stops;
 }
 
@@ -41,15 +55,16 @@ function barcodeList(stop) {
 // Eco-Transit Crew dashboard (formerly courier.html + courier.js).
 export default function CourierMain() {
   const C = window.CampusEco;
-  const [, refresh] = useStoreRefresh();
+  const { loading, error, data, reload } = useApiData(loadDashboard);
   const [message, showMessage] = useFlashMessage(3500);
 
-  // Data for this render (read fresh from the stores every time)
-  const courier = CourierStore.loadCourier();
-  const carts = CourierStore.carts();
-  const queue = Dispatch.queue();
-  const mine = Dispatch.myDeliveries();
-  const stops = groupStopsByBuilding();
+  // Data from the API (empty lists until it arrives)
+  const courier = data ? data.courier : null;
+  const carts = data ? data.carts : [];
+  const queue = data ? data.queue : [];
+  const mine = data ? data.mine : [];
+  const stops = groupStopsByBuilding(mine);
+  const activeCount = mine.filter((pkg) => pkg.group === "active").length;
 
   // Toolbar
   const [search, setSearch] = useState("");
@@ -59,16 +74,16 @@ export default function CourierMain() {
 
   // Keep the courier's choice if it is still usable, otherwise pick the first charged cart.
   const usableCarts = carts.filter((cart) => !cart.needsCharge);
-  const quickCart = usableCarts.some((cart) => cart.id === chosenCart)
+  const quickCart = usableCarts.some((cart) => String(cart.id) === chosenCart)
     ? chosenCart
     : usableCarts.length
-      ? usableCarts[0].id
+      ? String(usableCarts[0].id)
       : "";
 
   const term = search.trim().toLowerCase();
   const visibleQueue = queue.filter(
     (pkg) =>
-      (pkg.barcode.indexOf(term) !== -1 || pkg.building.toLowerCase().indexOf(term) !== -1) &&
+      (pkg.barcode.indexOf(term) !== -1 || pkg.buildingCode.toLowerCase().indexOf(term) !== -1) &&
       (priority === "all" || pkg.priority === priority),
   );
 
@@ -77,6 +92,7 @@ export default function CourierMain() {
   const [expanded, setExpanded] = useState([]); // barcodes with the details row open
   const [flash, setFlash] = useState({ barcode: null, n: 0 });
   const [fading, setFading] = useState(null); // queue row fading out after a claim
+  const [busy, setBusy] = useState(false); // a save is in progress
 
   const visibleMine = mine.filter((pkg) => !(hideDelivered && pkg.group === "delivered"));
 
@@ -85,22 +101,30 @@ export default function CourierMain() {
   }
 
   // Claim button in the route queue
-  function claim(barcode) {
+  async function claim(barcode) {
+    if (!courier) {
+      showMessage("Register or sign in as a courier before claiming a delivery.", "error");
+      return;
+    }
+    const cart = carts.find((c) => String(c.id) === quickCart);
+    setBusy(true);
     let pkg;
     try {
-      pkg = Dispatch.claim(barcode, quickCart);
+      pkg = await courierApi.claim(courier.id, barcode, Number(quickCart));
     } catch (err) {
+      setBusy(false);
       showMessage(err.message, "error");
       return;
     }
 
-    // Fade the row out of the queue, then rebuild and flash the new row.
+    // Fade the row out of the queue, then reload and flash the new row.
     setFading(barcode);
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
+      await reload();
       setFading(null);
-      refresh();
+      setBusy(false);
       flashRow(barcode);
-      showMessage("Claimed " + barcode + " for " + pkg.building + " on " + quickCart + ".");
+      showMessage("Claimed " + barcode + " for " + pkg.buildingCode + " on " + (cart ? cart.name : "your cart") + ".");
     }, C.animationMs(300));
   }
 
@@ -119,7 +143,7 @@ export default function CourierMain() {
 
   function openPanel(pkg) {
     setPanelPkg(pkg);
-    setPanelStatus(Dispatch.nextStatuses(pkg)[0] || "");
+    setPanelStatus(pkg.nextStatuses[0] || "");
     setPanelNotes("");
     setPanelOpen(true);
   }
@@ -132,24 +156,27 @@ export default function CourierMain() {
     if (panelOpen && firstOptionRef.current) firstOptionRef.current.focus();
   }, [panelOpen, panelPkg]);
 
-  function submitPanel(event) {
+  async function submitPanel(event) {
     event.preventDefault(); // stay on the page
     const barcode = panelPkg.barcode;
     let pkg;
 
+    setBusy(true);
     try {
-      pkg = Dispatch.updateStatus(barcode, panelStatus, panelNotes.trim());
+      pkg = await courierApi.updateStatus(courier.id, barcode, panelStatus, panelNotes.trim());
     } catch (err) {
+      setBusy(false);
       showMessage(err.message, "error");
       return;
     }
 
     closePanel();
-    refresh();
+    await reload();
+    setBusy(false);
     flashRow(barcode);
     showMessage(barcode + ' is now "' + pkg.status + '".');
 
-    if (pkg.status === "En Route") driveTo(pkg.building);
+    if (pkg.status === "En Route") driveTo(pkg.buildingCode);
   }
 
   // Cart route map: uses the shared routeTo() waypoints from Models.js,
@@ -218,7 +245,7 @@ export default function CourierMain() {
   }
 
   async function startRoute() {
-    const routeStops = groupStopsByBuilding();
+    const routeStops = groupStopsByBuilding(mine);
     if (routeStops.length === 0) {
       setRouteStatus("No active deliveries to drive to.");
       return;
@@ -283,18 +310,7 @@ export default function CourierMain() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Reset demo data (packages and courier data)
-  function resetDemo() {
-    if (window.confirm("Reset all demo data in this browser?")) {
-      resetCourierDemo();
-      resetRoute();
-      setExpanded([]);
-      refresh();
-      showMessage("Demo data reset.");
-    }
-  }
-
-  const panelOptions = panelPkg ? Dispatch.nextStatuses(panelPkg) : [];
+  const panelOptions = panelPkg ? panelPkg.nextStatuses : [];
 
   return (
     <>
@@ -303,15 +319,18 @@ export default function CourierMain() {
           <h2>Couriers</h2>
 
           <p id="courier-greeting" className="courier-greeting">
-            {courier ? (
-              "Signed in as " + courier.name + " (" + courier.roleLabel + ", " + courier.shift + " shift)"
+            {loading ? (
+              "Loading..."
+            ) : courier ? (
+              "Signed in as " + courier.name + " (" + courier.roleLabel + ", " + courier.shift.toLowerCase() + " shift)"
             ) : (
               <>
-                You are using a guest account. <a href="courierRegister.html">Register as a courier</a>
+                You are not signed in. <a href="courierRegister.html">Register or sign in as a courier</a>
               </>
             )}
           </p>
 
+          <ApiError message={error} onRetry={reload} />
           <FormMessage id="courier-message" message={message} />
 
           <section>
@@ -348,7 +367,7 @@ export default function CourierMain() {
               <label htmlFor="claim-cart-quick">Claim using</label>
               <select id="claim-cart-quick" value={quickCart} onChange={(e) => setChosenCart(e.target.value)}>
                 {carts.map((cart) => (
-                  <option key={cart.id} value={cart.id} disabled={cart.needsCharge}>
+                  <option key={cart.id} value={String(cart.id)} disabled={cart.needsCharge}>
                     {cartLabel(cart)}
                   </option>
                 ))}
@@ -383,20 +402,20 @@ export default function CourierMain() {
                     >
                       <td>{i + 1}</td>
                       <td>{pkg.barcode}</td>
-                      <td title={pkg.buildingName}>{pkg.building}</td>
-                      <td>{pkg.locker}</td>
+                      <td title={pkg.buildingName}>{pkg.buildingCode}</td>
+                      <td>{pkg.lockerId}</td>
                       <td>{Number(pkg.weightLb).toFixed(1) + " lb"}</td>
                       <td>
                         <PriorityBadge priority={pkg.priority} />
                       </td>
                       <td>
-                        <StatusBadge status={pkg.status} />
+                        <StatusBadge status={pkg.displayStatus} />
                       </td>
                       <td>
                         <button
                           type="button"
                           className="claim-btn"
-                          disabled={fading !== null}
+                          disabled={busy}
                           onClick={() => claim(pkg.barcode)}
                         >
                           Claim
@@ -405,7 +424,7 @@ export default function CourierMain() {
                     </tr>
                   ),
                 )}
-                {queue.length === 0 && (
+                {!loading && queue.length === 0 && (
                   <tr>
                     <td colSpan={8}>No deliveries waiting. Nice work!</td>
                   </tr>
@@ -429,7 +448,7 @@ export default function CourierMain() {
 
             <table id="my-table">
               <caption>
-                Deliveries you have claimed (<span id="my-count">{Dispatch.activeStops().length + " active"}</span>)
+                Deliveries you have claimed (<span id="my-count">{activeCount + " active"}</span>)
               </caption>
 
               <thead>
@@ -456,13 +475,13 @@ export default function CourierMain() {
                         className={isFlashing ? "flash" : undefined}
                       >
                         <td>{pkg.barcode}</td>
-                        <td title={pkg.buildingName}>{pkg.building}</td>
-                        <td>{pkg.locker}</td>
+                        <td title={pkg.buildingName}>{pkg.buildingCode}</td>
+                        <td>{pkg.lockerId}</td>
                         <td>
                           <PriorityBadge priority={pkg.priority} />
                         </td>
                         <td>
-                          <StatusBadge status={Dispatch.displayStatus(pkg)} />
+                          <StatusBadge status={pkg.displayStatus} />
                         </td>
                         <td>
                           <button
@@ -473,7 +492,7 @@ export default function CourierMain() {
                           >
                             View
                           </button>
-                          {Dispatch.nextStatuses(pkg).length > 0 && (
+                          {pkg.nextStatuses.length > 0 && (
                             <>
                               {" "}
                               <button type="button" className="update-btn" onClick={() => openPanel(pkg)}>
@@ -487,9 +506,11 @@ export default function CourierMain() {
                     </Fragment>
                   );
                 })}
-                {mine.length === 0 && (
+                {!loading && mine.length === 0 && (
                   <tr>
-                    <td colSpan={6}>You haven&apos;t claimed any deliveries yet.</td>
+                    <td colSpan={6}>
+                      {courier ? "You haven't claimed any deliveries yet." : "Sign in to see the deliveries you have claimed."}
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -554,20 +575,14 @@ export default function CourierMain() {
             <div id="battery-list" className="battery-list">
               {carts.map((cart) => (
                 <div key={cart.id} className={"battery-card battery-" + cart.batteryState}>
-                  <strong>{cart.id}</strong>
-                  <BatteryBar level={cart.batteryPct} />
-                  <span>{cart.batteryPct + "%" + (cart.needsCharge ? " - needs charge" : "")}</span>
+                  <strong>{cart.name}</strong>
+                  <BatteryBar level={cart.batteryPercentage} />
+                  <span>{cart.batteryPercentage + "%" + (cart.needsCharge ? " - needs charge" : "")}</span>
                 </div>
               ))}
             </div>
             <a href="courierUpdate.html#battery-form">Report Battery Status</a>
           </section>
-
-          <p>
-            <button type="button" id="courier-reset" className="secondary-button" onClick={resetDemo}>
-              Reset demo data
-            </button>
-          </p>
         </section>
       </main>
 
@@ -587,7 +602,7 @@ export default function CourierMain() {
         </p>
         <p>
           Current status:{" "}
-          <span id="panel-current">{panelPkg && <StatusBadge status={Dispatch.displayStatus(panelPkg)} />}</span>
+          <span id="panel-current">{panelPkg && <StatusBadge status={panelPkg.displayStatus} />}</span>
         </p>
 
         <form id="panel-form" onSubmit={submitPanel}>
@@ -621,7 +636,9 @@ export default function CourierMain() {
             onChange={(e) => setPanelNotes(e.target.value)}
           ></textarea>
 
-          <button type="submit">Save Status</button>
+          <button type="submit" disabled={busy}>
+            Save Status
+          </button>
         </form>
       </aside>
     </>
@@ -636,11 +653,11 @@ function DetailsRow({ pkg }) {
       <td colSpan={6}>
         <div className="details-box slide-in">
           <p>
-            {pkg.building + ", " + pkg.buildingName + " | " + pkg.weightLb + " lb | " + pkg.cart.id +
-              " (" + pkg.cart.batteryPct + "% battery)"}
+            {pkg.buildingCode + ", " + pkg.buildingName + " | " + pkg.weightLb + " lb | " +
+              (pkg.cartName ? pkg.cartName + " (" + pkg.cartBatteryPercentage + "% battery)" : "No cart yet")}
           </p>
           <ol className="timeline">
-            {Dispatch.timeline(pkg).map((item, i) => (
+            {pkg.timeline.map((item, i) => (
               <li key={i}>
                 {item.status + " - " + C.formatDateTime(item.at) + (item.notes ? " - " + item.notes : "")}
               </li>
