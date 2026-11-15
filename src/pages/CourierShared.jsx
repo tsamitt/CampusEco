@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { courierApi } from "../Api/courierApi.js";
 
 // Shared pieces for the three Courier pages (courier, register, update).
-// Package data comes from the global CampusEco object that public/Models.js defines;
-// courier data comes from ./courierModels.js.
+// Courier, package and cart data come from the C# API (see src/Api/courierApi.js).
+// Map and date helpers still come from the global CampusEco object in public/Models.js.
 
 // Colored priority label (Urgent, Standard, Low).
 export function PriorityBadge({ priority }) {
@@ -22,29 +23,82 @@ export function StatusBadge({ status }) {
 // "Cart 2 (64%, needs charge)" style label used in the cart dropdowns.
 export function cartLabel(cart) {
   return (
-    cart.id +
+    cart.name +
     " (" +
-    cart.batteryPct +
+    cart.batteryPercentage +
     "%" +
     (cart.needsCharge ? ", needs charge" : "") +
     ")"
   );
 }
 
-// Re-renders the page after the stores change. Also refreshes when another
-// tab (operator or tracking pages) changes the shared localStorage data.
-export function useStoreRefresh() {
-  const [version, refresh] = useReducer((n) => n + 1, 0);
+// Loads data from the API when the page opens. Returns { loading, error, data, reload }.
+// Call reload() after saving something to fetch fresh data.
+// `load` should be a function defined outside the component (so it never changes).
+export function useApiData(load) {
+  const [state, setState] = useState({ loading: true, error: "", data: null });
+
+  const reload = useCallback(async () => {
+    try {
+      const data = await load();
+      setState({ loading: false, error: "", data });
+      return data;
+    } catch (err) {
+      setState((s) => ({ loading: false, error: err.message, data: s.data }));
+      return null;
+    }
+  }, [load]);
 
   useEffect(() => {
-    function onStorage(event) {
-      if (!event.key || event.key.indexOf("campuseco.") === 0) refresh();
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+    reload();
+  }, [reload]);
 
-  return [version, refresh];
+  return { ...state, reload };
+}
+
+// Looks a barcode up in the API while the courier types it.
+// Returns null while the barcode is incomplete, { loading: true } while waiting,
+// then { pkg } (the package, or null if no package has that barcode).
+export function usePackageLookup(barcode) {
+  const valid = isValidBarcode(barcode);
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (!valid) return undefined;
+    let cancelled = false;
+    courierApi
+      .getPackage(barcode)
+      .then((pkg) => !cancelled && setResult({ barcode, pkg }))
+      .catch((err) => !cancelled && setResult({ barcode, pkg: null, error: err.status === 404 ? "" : err.message }));
+    return () => {
+      cancelled = true;
+    };
+  }, [barcode, valid]);
+
+  if (!valid) return null;
+  // Still waiting for the answer for this barcode (an older answer is ignored).
+  if (!result || result.barcode !== barcode) return { loading: true };
+  return result;
+}
+
+// Same rule as the HTML pattern attribute: 1234-5678-9012
+export function isValidBarcode(barcode) {
+  return /^[0-9]{4}-[0-9]{4}-[0-9]{4}$/.test(String(barcode));
+}
+
+// Red message with a Try again button, shown when the API can't be reached.
+export function ApiError({ message, onRetry }) {
+  if (!message) return null;
+  return (
+    <div className="form-message is-error" role="alert">
+      {message}{" "}
+      {onRetry && (
+        <button type="button" onClick={onRetry}>
+          Try again
+        </button>
+      )}
+    </div>
+  );
 }
 
 // Feedback message that hides itself after a few seconds.
