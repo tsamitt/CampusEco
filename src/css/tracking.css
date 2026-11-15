@@ -256,7 +256,7 @@ textarea {
   resize: vertical;
 }
 
-input:invalid:not(:placeholder-shown):not(:focus) {
+input:user-invalid:not(:placeholder-shown):not(:focus) {
   border-color: var(--err);
 }
 
