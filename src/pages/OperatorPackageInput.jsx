@@ -1,7 +1,7 @@
 
 import { useState, useRef } from "react";
 import "./../css/operator.css";
-
+import { PACKAGE_API_URL } from "./OperatorMain"
 function OperatorPackageInput() {
 
     // Form State
@@ -94,7 +94,7 @@ function OperatorPackageInput() {
 
             // Send package to the backend API.
 
-            const response = await fetch("http://localhost:5080/api/packages", {
+            const response = await fetch(PACKAGE_API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

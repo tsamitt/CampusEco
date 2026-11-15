@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import "./../css/operator.css";
+export const PACKAGE_API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5080") + "/api/packages";
 
 const STATUS_NAMES = [
     "Checked In",
@@ -88,7 +89,7 @@ export default function OperatorMain() {
             setIsLoading(true);
             setLoadError("");
 
-            const response = await fetch("http://localhost:5080/api/packages");
+            const response = await fetch(PACKAGE_API_URL);
 
             if (!response.ok) {
                 throw new Error("Failed to retrieve packages.");
@@ -182,7 +183,7 @@ export default function OperatorMain() {
 
         try {
             const response = await fetch(
-                `http://localhost:5080/api/packages/${encodeURIComponent(selectedPackage.barcode)}`,
+                `${PACKAGE_API_URL}/${encodeURIComponent(selectedPackage.barcode)}`,
                 {
                     method: "PUT",
                     headers: {
@@ -220,7 +221,7 @@ export default function OperatorMain() {
 
         try {
             const response = await fetch(
-                `http://localhost:5080/api/packages/${encodeURIComponent(pendingBarcode)}/status`,
+                `${PACKAGE_API_URL}/${encodeURIComponent(pendingBarcode)}/status`,
                 {
                     method: "PATCH",
                     headers: {
