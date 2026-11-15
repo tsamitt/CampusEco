@@ -2,6 +2,53 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "./../css/operator.css";
 
+const STATUS_NAMES = [
+    "Checked In",
+    "Awaiting Pickup",
+    "Loaded",
+    "En Route",
+    "Delivered",
+    "Cancelled"
+];
+
+const PRIORITY_NAMES = [
+    "Low",
+    "Standard",
+    "Urgent"
+];
+
+function mapPackage(dto) {
+    return {
+        id: dto.id,
+        barcode: dto.barcode,
+        building: dto.buildingCode,
+        buildingName: dto.buildingName,
+        locker: dto.lockerId,
+
+        lengthIn: dto.lengthIn,
+        widthIn: dto.widthIn,
+        heightIn: dto.heightIn,
+        weightLb: dto.weightLb,
+
+        priority: typeof dto.priority === "number"
+            ? PRIORITY_NAMES[dto.priority]
+            : dto.priority,
+
+        status: typeof dto.status === "number"
+            ? STATUS_NAMES[dto.status]
+            : dto.status,
+
+        cartId: dto.cartId,
+        cartName: dto.cartName,
+        cartBatteryPercentage: dto.cartBatteryPercentage,
+        routeIndex: dto.routeIndex,
+
+        specialInstructions: dto.specialInstructions || "",
+
+        history: dto.history || []
+    };
+}
+
 export default function OperatorMain() {
     const [packages, setPackages] = useState([]);
     const [search, setSearch] = useState("");
@@ -19,6 +66,9 @@ export default function OperatorMain() {
     const CampusEco = window.CampusEco;
     const dialogRef = useRef(null);
 
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState("");
+
     useEffect(() => {
         const dialog = dialogRef.current;
 
@@ -33,8 +83,27 @@ export default function OperatorMain() {
         };
     }, [selectedPackage]);
 
-    function refreshPackages() {
-        setPackages(CampusEco.PackageStore.all());
+    async function refreshPackages() {
+        try {
+            setIsLoading(true);
+            setLoadError("");
+
+            const response = await fetch("http://localhost:5080/api/packages");
+
+            if (!response.ok) {
+                throw new Error("Failed to retrieve packages.");
+            }
+
+            const data = await response.json();
+
+            setPackages(data.map(mapPackage));
+
+        } catch (error) {
+            console.error("Error loading packages:", error);
+            setLoadError("Unable to load packages. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -276,7 +345,17 @@ export default function OperatorMain() {
 
                         </div>
 
-                        {filteredPackages.length === 0 && (
+                        {isLoading && (
+                            <p>Loading packages...</p>
+                        )}
+
+                        {loadError && (
+                            <p className="feedback error" role="alert">
+                                {loadError}
+                            </p>
+                        )}
+
+                        {!isLoading && !loadError && filteredPackages.length === 0 && (
                             <p>No matching packages found.</p>
                         )}
 
