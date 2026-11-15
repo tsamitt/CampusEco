@@ -45,12 +45,22 @@ main textarea {
   box-sizing: border-box;
 }
 /* Tables retain column semantics and can be scrolled on narrow screens. */
-body:not(.tracking-portal) main table {
+body:not(.tracking-portal) main .table-container {
   display: block;
   overflow-x: auto;
-  max-width: 100%;
   -webkit-overflow-scrolling: touch;
 }
+.table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
 body:not(.tracking-portal) main table thead,
 body:not(.tracking-portal) main table tbody {
   white-space: nowrap;

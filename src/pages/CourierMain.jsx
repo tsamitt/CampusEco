@@ -265,7 +265,7 @@ export default function CourierMain() {
       if (!(await followRoute(route.slice(1), run))) return;
       setRouteStatus(
         "Stop " + (i + 1) + ": " + stop.name + " - " + count +
-          (count === 1 ? " package (" : " packages (") + barcodeList(stop) + ")",
+        (count === 1 ? " package (" : " packages (") + barcodeList(stop) + ")",
       );
       setVisited((list) => list.concat(stop.building));
 
@@ -373,64 +373,65 @@ export default function CourierMain() {
                 ))}
               </select>
             </div>
+            <div class="table-container">
+              <table id="queue-table">
+                <caption>
+                  Route queue: deliveries waiting to be claimed (<span id="queue-count">{queue.length}</span>)
+                </caption>
 
-            <table id="queue-table">
-              <caption>
-                Route queue: deliveries waiting to be claimed (<span id="queue-count">{queue.length}</span>)
-              </caption>
-
-              <thead>
-                <tr>
-                  <th scope="col">Stop</th>
-                  <th scope="col">Tracking Barcode</th>
-                  <th scope="col">Building</th>
-                  <th scope="col">Locker Array</th>
-                  <th scope="col">Weight</th>
-                  <th scope="col">Priority</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody id="queue-body">
-                {queue.map((pkg, i) =>
-                  visibleQueue.indexOf(pkg) === -1 ? null : (
-                    <tr
-                      key={pkg.barcode}
-                      data-barcode={pkg.barcode}
-                      className={fading === pkg.barcode ? "fade-out" : undefined}
-                    >
-                      <td>{i + 1}</td>
-                      <td>{pkg.barcode}</td>
-                      <td title={pkg.buildingName}>{pkg.buildingCode}</td>
-                      <td>{pkg.lockerId}</td>
-                      <td>{Number(pkg.weightLb).toFixed(1) + " lb"}</td>
-                      <td>
-                        <PriorityBadge priority={pkg.priority} />
-                      </td>
-                      <td>
-                        <StatusBadge status={pkg.displayStatus} />
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="claim-btn"
-                          disabled={busy}
-                          onClick={() => claim(pkg.barcode)}
-                        >
-                          Claim
-                        </button>
-                      </td>
-                    </tr>
-                  ),
-                )}
-                {!loading && queue.length === 0 && (
+                <thead>
                   <tr>
-                    <td colSpan={8}>No deliveries waiting. Nice work!</td>
+                    <th scope="col">Stop</th>
+                    <th scope="col">Tracking Barcode</th>
+                    <th scope="col">Building</th>
+                    <th scope="col">Locker Array</th>
+                    <th scope="col">Weight</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody id="queue-body">
+                  {queue.map((pkg, i) =>
+                    visibleQueue.indexOf(pkg) === -1 ? null : (
+                      <tr
+                        key={pkg.barcode}
+                        data-barcode={pkg.barcode}
+                        className={fading === pkg.barcode ? "fade-out" : undefined}
+                      >
+                        <td>{i + 1}</td>
+                        <td>{pkg.barcode}</td>
+                        <td title={pkg.buildingName}>{pkg.buildingCode}</td>
+                        <td>{pkg.lockerId}</td>
+                        <td>{Number(pkg.weightLb).toFixed(1) + " lb"}</td>
+                        <td>
+                          <PriorityBadge priority={pkg.priority} />
+                        </td>
+                        <td>
+                          <StatusBadge status={pkg.displayStatus} />
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="claim-btn"
+                            disabled={busy}
+                            onClick={() => claim(pkg.barcode)}
+                          >
+                            Claim
+                          </button>
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                  {!loading && queue.length === 0 && (
+                    <tr>
+                      <td colSpan={8}>No deliveries waiting. Nice work!</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section>
@@ -445,76 +446,77 @@ export default function CourierMain() {
               />{" "}
               Hide delivered packages
             </label>
+            <div class="table-container">
+              <table id="my-table">
+                <caption>
+                  Deliveries you have claimed (<span id="my-count">{activeCount + " active"}</span>)
+                </caption>
 
-            <table id="my-table">
-              <caption>
-                Deliveries you have claimed (<span id="my-count">{activeCount + " active"}</span>)
-              </caption>
-
-              <thead>
-                <tr>
-                  <th scope="col">Tracking Barcode</th>
-                  <th scope="col">Building</th>
-                  <th scope="col">Locker Array</th>
-                  <th scope="col">Priority</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody id="my-body">
-                {visibleMine.map((pkg) => {
-                  const isFlashing = flash.barcode === pkg.barcode;
-                  return (
-                    <Fragment key={pkg.barcode}>
-                      <tr
-                        // A new key replays the flash animation each time the row is updated.
-                        key={isFlashing ? "flash-" + flash.n : "row"}
-                        data-barcode={pkg.barcode}
-                        data-group={pkg.group}
-                        className={isFlashing ? "flash" : undefined}
-                      >
-                        <td>{pkg.barcode}</td>
-                        <td title={pkg.buildingName}>{pkg.buildingCode}</td>
-                        <td>{pkg.lockerId}</td>
-                        <td>
-                          <PriorityBadge priority={pkg.priority} />
-                        </td>
-                        <td>
-                          <StatusBadge status={pkg.displayStatus} />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="view-btn"
-                            aria-expanded={expanded.indexOf(pkg.barcode) !== -1}
-                            onClick={() => toggleDetails(pkg.barcode)}
-                          >
-                            View
-                          </button>
-                          {pkg.nextStatuses.length > 0 && (
-                            <>
-                              {" "}
-                              <button type="button" className="update-btn" onClick={() => openPanel(pkg)}>
-                                Update Status
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                      {expanded.indexOf(pkg.barcode) !== -1 && <DetailsRow pkg={pkg} />}
-                    </Fragment>
-                  );
-                })}
-                {!loading && mine.length === 0 && (
+                <thead>
                   <tr>
-                    <td colSpan={6}>
-                      {courier ? "You haven't claimed any deliveries yet." : "Sign in to see the deliveries you have claimed."}
-                    </td>
+                    <th scope="col">Tracking Barcode</th>
+                    <th scope="col">Building</th>
+                    <th scope="col">Locker Array</th>
+                    <th scope="col">Priority</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody id="my-body">
+                  {visibleMine.map((pkg) => {
+                    const isFlashing = flash.barcode === pkg.barcode;
+                    return (
+                      <Fragment key={pkg.barcode}>
+                        <tr
+                          // A new key replays the flash animation each time the row is updated.
+                          key={isFlashing ? "flash-" + flash.n : "row"}
+                          data-barcode={pkg.barcode}
+                          data-group={pkg.group}
+                          className={isFlashing ? "flash" : undefined}
+                        >
+                          <td>{pkg.barcode}</td>
+                          <td title={pkg.buildingName}>{pkg.buildingCode}</td>
+                          <td>{pkg.lockerId}</td>
+                          <td>
+                            <PriorityBadge priority={pkg.priority} />
+                          </td>
+                          <td>
+                            <StatusBadge status={pkg.displayStatus} />
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="view-btn"
+                              aria-expanded={expanded.indexOf(pkg.barcode) !== -1}
+                              onClick={() => toggleDetails(pkg.barcode)}
+                            >
+                              View
+                            </button>
+                            {pkg.nextStatuses.length > 0 && (
+                              <>
+                                {" "}
+                                <button type="button" className="update-btn" onClick={() => openPanel(pkg)}>
+                                  Update Status
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                        {expanded.indexOf(pkg.barcode) !== -1 && <DetailsRow pkg={pkg} />}
+                      </Fragment>
+                    );
+                  })}
+                  {!loading && mine.length === 0 && (
+                    <tr>
+                      <td colSpan={6}>
+                        {courier ? "You haven't claimed any deliveries yet." : "Sign in to see the deliveries you have claimed."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section>

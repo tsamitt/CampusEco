@@ -405,90 +405,92 @@ export default function OperatorMain() {
                         {!isLoading && !loadError && filteredPackages.length === 0 && (
                             <p>No matching packages found.</p>
                         )}
-
-                        <table id="package-activity-table">
-                            <caption>Recently checked-in packages</caption>
-                            <thead>
-                                <tr>
-                                    <th>Tracking Barcode</th>
-                                    <th>Building</th>
-                                    <th>Locker Array</th>
-                                    <th>Dimensions</th>
-                                    <th>Weight</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {filteredPackages.map((pkg) => (
-                                    <tr key={pkg.barcode}>
-                                        <td>{pkg.barcode}</td>
-                                        <td>{pkg.building}</td>
-                                        <td>{pkg.locker}</td>
-                                        <td>
-                                            {pkg.lengthIn} x {pkg.widthIn} x {pkg.heightIn} ″
-                                        </td>
-                                        <td>{pkg.weightLb} lb</td>
-                                        <td>
-                                            <span className={`badge priority-${pkg.priority.toLowerCase()}`}>
-                                                {formatPriority(pkg.priority)}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`badge badge-${pkg.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                                                {pkg.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="table-actions">
-                                                <button onClick={() => openModal(pkg, "view")}>
-                                                    View
-                                                </button>
-                                                <button onClick={() => openModal(pkg, "edit")}>
-                                                    Edit
-                                                </button>
-                                                <button onClick={() => cancelPackage(pkg.barcode)}>
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </td>
+                        <div class="table-container">
+                            <table id="package-activity-table">
+                                <caption>Recently checked-in packages</caption>
+                                <thead>
+                                    <tr>
+                                        <th>Tracking Barcode</th>
+                                        <th>Building</th>
+                                        <th>Locker Array</th>
+                                        <th>Dimensions</th>
+                                        <th>Weight</th>
+                                        <th>Priority</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    {filteredPackages.map((pkg) => (
+                                        <tr key={pkg.barcode}>
+                                            <td>{pkg.barcode}</td>
+                                            <td>{pkg.building}</td>
+                                            <td>{pkg.locker}</td>
+                                            <td>
+                                                {pkg.lengthIn} x {pkg.widthIn} x {pkg.heightIn} ″
+                                            </td>
+                                            <td>{pkg.weightLb} lb</td>
+                                            <td>
+                                                <span className={`badge priority-${pkg.priority.toLowerCase()}`}>
+                                                    {formatPriority(pkg.priority)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-${pkg.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                    {pkg.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="table-actions">
+                                                    <button onClick={() => openModal(pkg, "view")}>
+                                                        View
+                                                    </button>
+                                                    <button onClick={() => openModal(pkg, "edit")}>
+                                                        Edit
+                                                    </button>
+                                                    <button onClick={() => cancelPackage(pkg.barcode)}>
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
 
                     <section>
                         <h3>Urgent Deliveries</h3>
-
-                        <table>
-                            <caption>Packages that must be delivered urgently</caption>
-                            <thead>
-                                <tr>
-                                    <th>Tracking Barcode</th>
-                                    <th>Building</th>
-                                    <th>Locker Array</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {urgentPackages.map((pkg) => (
-                                    <tr key={pkg.barcode}>
-                                        <td>{pkg.barcode}</td>
-                                        <td>{pkg.building}</td>
-                                        <td>{pkg.locker}</td>
-                                        <td>
-                                            <span className={`badge badge-${pkg.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                                                {pkg.status}
-                                            </span>
-                                        </td>
+                        <div class="table-container">
+                            <table>
+                                <caption>Packages that must be delivered urgently</caption>
+                                <thead>
+                                    <tr>
+                                        <th>Tracking Barcode</th>
+                                        <th>Building</th>
+                                        <th>Locker Array</th>
+                                        <th>Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody>
+                                    {urgentPackages.map((pkg) => (
+                                        <tr key={pkg.barcode}>
+                                            <td>{pkg.barcode}</td>
+                                            <td>{pkg.building}</td>
+                                            <td>{pkg.locker}</td>
+                                            <td>
+                                                <span className={`badge badge-${pkg.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                                    {pkg.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </section>
                 </section>
             </main >
