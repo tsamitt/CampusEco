@@ -215,22 +215,42 @@ export default function OperatorMain() {
         setPendingBarcode(barcode);
     }
 
-    function confirmCancellation() {
+    async function confirmCancellation() {
         if (!pendingBarcode) return;
 
-        const pkg = CampusEco.PackageStore.find(pendingBarcode);
+        try {
+            const response = await fetch(
+                `http://localhost:5080/api/packages/${encodeURIComponent(pendingBarcode)}/status`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        status: "Cancelled",
+                        location: "Central Hub",
+                        description: "Package cancelled by operator"
+                    })
+                }
+            );
 
-        if (
-            pkg &&
-            pkg.status !== "Delivered" &&
-            pkg.status !== "Cancelled"
-        ) {
-            pkg.setStatus("Cancelled");
-            CampusEco.PackageStore.save(pkg);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+
+                throw new Error(
+                    errorData.error ||
+                    errorData.title ||
+                    "Unable to cancel package."
+                );
+            }
+
+            setPendingBarcode(null);
+            await refreshPackages();
+
+        } catch (error) {
+            console.error("Error cancelling package:", error);
+            alert(error.message);
         }
-
-        setPendingBarcode(null);
-        refreshPackages();
     }
 
     function clearFilters() {
