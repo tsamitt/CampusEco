@@ -64,9 +64,6 @@
   margin: 0 0 0.75rem;
 }
 
-.tracking-portal a {
-  color: var(--purple);
-}
 
 :focus-visible {
   outline: 3px solid var(--focus);
