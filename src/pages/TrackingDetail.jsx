@@ -1,8 +1,10 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import "../css/tracking.css";
-import { StatusBadge, useTrackingBody } from "./trackingShared";
+import { trackingApi } from "../Api/trackingApi";
+import { ErrorNotice, LoadingNotice, StatusBadge, useTrackingBody } from "./trackingShared";
 
 const TICK_MS = 4000; // how often the simulated cart moves to its next waypoint
+const POLL_MS = 5000; // how often the page asks the API for changes (for example from the courier portal)
 
 // The cart stops one waypoint short of the building and waits for the courier to mark it Delivered.
 function atDestination(pkg) {
@@ -13,37 +15,70 @@ function pct(value, total) {
   return ((value / total) * 100).toFixed(3) + "%";
 }
 
-// Finds the package from ?barcode= in the URL (falls back to an En Route package of the user's).
-function findPackage() {
-  const C = window.CampusEco;
+// Loads the package from ?barcode= in the URL (falls back to an En Route package when there is none).
+async function loadPackage() {
   const requested = new URLSearchParams(window.location.search).get("barcode");
-  if (requested) return C.PackageStore.find(requested);
-  const mine = C.PackageStore.mine();
-  return mine.find((p) => p.status === "En Route") || mine[0] || null;
+  if (requested) return trackingApi.getPackage(requested);
+  const list = await trackingApi.packages();
+  return list.find((p) => p.status === "En Route") || list[0] || null;
 }
 
-// End-User package detail page (formerly trackingdetail.html + Trackingdetail.js).
+// Page shell shared by the loading, error, and not-found states.
+function DetailShell({ children }) {
+  return (
+    <div className="tracking-portal">
+      <main id="main">
+        <h2>Package Details</h2>
+        <p>
+          <a href="tracking.html">Back to Your Packages</a>
+        </p>
+        {children}
+      </main>
+    </div>
+  );
+}
+
+// End-User package detail page (formerly trackingdetail.html + Trackingdetail.js). Loads from the C# API.
 export default function TrackingDetail() {
   useTrackingBody();
-  const [pkg, setPkg] = useState(findPackage);
+  const [pkg, setPkg] = useState(null);
+  const [state, setState] = useState("loading"); // loading, ready, missing, or error
+  const [loadError, setLoadError] = useState("");
 
-  if (!pkg) {
-    return (
-      <div className="tracking-portal">
-        <main id="main">
-          <h2>Package Details</h2>
-          <p>
-            <a href="tracking.html">Back to Your Packages</a>
-          </p>
-          <div className="card">
-            <h3>Package not found</h3>
-            <p>We could not find that tracking number. Go back and search again.</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-  return <DetailView key={pkg.barcode} pkg={pkg} setPkg={setPkg} />;
+  const load = useCallback(async () => {
+    setState("loading");
+    try {
+      const found = await loadPackage();
+      if (found) {
+        setPkg(found);
+        setState("ready");
+      } else {
+        setState("missing");
+      }
+    } catch (error) {
+      setLoadError(error.message);
+      setState("error");
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (state === "ready") return <DetailView key={pkg.barcode} pkg={pkg} setPkg={setPkg} />;
+
+  return (
+    <DetailShell>
+      {state === "loading" && <LoadingNotice>Loading package details...</LoadingNotice>}
+      {state === "error" && <ErrorNotice message={loadError} onRetry={load} />}
+      {state === "missing" && (
+        <div className="card">
+          <h3>Package not found</h3>
+          <p>We could not find that tracking number. Go back and search again.</p>
+        </div>
+      )}
+    </DetailShell>
+  );
 }
 
 function DetailView({ pkg, setPkg }) {
@@ -53,6 +88,10 @@ function DetailView({ pkg, setPkg }) {
   const [demoOpen, setDemoOpen] = useState(false);
   const [live, setLive] = useState("");
   const animateRef = useRef(false); // true when the next render should glide the cart marker
+  const pkgRef = useRef(pkg); // always the newest package, so timers don't use a stale one
+  pkgRef.current = pkg;
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [demoError, setDemoError] = useState("");
 
   // receipt form
   const [name, setName] = useState("");
@@ -70,39 +109,52 @@ function DetailView({ pkg, setPkg }) {
   }
 
   function update(animate, announcement) {
-    C.PackageStore.save(pkg);
     animateRef.current = animate;
     if (announcement) setLive(announcement);
     bump();
   }
 
   // Cart simulation: one tick every few seconds while the package is En Route.
+  // The position is only for the map, so it is not saved; the status itself comes from the API.
   useEffect(() => {
     if (!moving) return undefined;
     const id = window.setInterval(() => {
-      pkg.advanceOnRoute();
-      const text = atDestination(pkg)
-        ? pkg.cart.id + " has reached " + buildingLabel(pkg.building) + " and is waiting for the courier to confirm delivery."
-        : pkg.cart.id + " is now at " + pkg.currentPoint.where + ".";
+      const current = pkgRef.current;
+      if (current.status !== "En Route" || atDestination(current)) return;
+      current.routeIndex += 1;
+      current.lastLocationAt = new Date().toISOString();
+      const text = atDestination(current)
+        ? current.cart.id + " has reached " + buildingLabel(current.building) + " and is waiting for the courier to confirm delivery."
+        : current.cart.id + " is now at " + current.currentPoint.where + ".";
       update(true, text);
     }, TICK_MS);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moving, pkg]);
+  }, [moving]);
 
-  // If another tab (for example the courier portal) changes the data, refresh this page.
+  // If someone else (for example the courier) changes this package, pick the change up from the API.
   useEffect(() => {
-    function onStorage(event) {
-      if (event.key !== "campuseco.packages") return;
-      const fresh = C.PackageStore.find(pkg.barcode);
-      if (fresh) {
+    let stopped = false;
+    const id = window.setInterval(async () => {
+      try {
+        const fresh = await trackingApi.getPackage(pkg.barcode);
+        if (stopped || !fresh) return;
+        const current = pkgRef.current;
+        if (fresh.status === "En Route" && current.status === "En Route") {
+          fresh.routeIndex = Math.max(fresh.routeIndex, current.routeIndex); // keep the simulated cart where it is
+        }
+        if (fresh.status !== current.status) setLive("Status changed to " + fresh.status + ".");
         animateRef.current = true;
         setPkg(fresh);
+      } catch {
+        // The next refresh will try again.
       }
-    }
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [pkg.barcode, setPkg, C]);
+    }, POLL_MS);
+    return () => {
+      stopped = true;
+      window.clearInterval(id);
+    };
+  }, [pkg.barcode, setPkg]);
 
   // -------- location text --------
   let where;
@@ -187,6 +239,7 @@ function DetailView({ pkg, setPkg }) {
     }
     setReceiptError("");
     pkg.signFor(cleanName, condition, cleanNotes);
+    trackingApi.saveReceipt(pkg.barcode, pkg.receipt); // receipts stay in this browser until the API has an endpoint
     update(false, "Receipt confirmed for package " + pkg.barcode + ".");
   }
 
@@ -200,22 +253,26 @@ function DetailView({ pkg, setPkg }) {
   };
   const finished = pkg.status === "Delivered" || pkg.status === "Cancelled";
 
-  function advanceStatus() {
-    if (pkg.status === "Checked In" || pkg.status === "Awaiting Pickup") pkg.setStatus("Loaded");
-    else if (pkg.status === "Loaded") pkg.setStatus("En Route");
-    else if (pkg.status === "En Route") pkg.setStatus("Delivered");
-    update(true, "Status changed to " + pkg.status + ".");
-  }
+  // Moves the package forward in the database, the same change the courier portal makes.
+  async function advanceStatus() {
+    let next = null;
+    if (pkg.status === "Checked In" || pkg.status === "Awaiting Pickup") next = "Loaded";
+    else if (pkg.status === "Loaded") next = "En Route";
+    else if (pkg.status === "En Route") next = "Delivered";
+    if (!next) return;
 
-  function restartPackage() {
-    setPaused(false);
-    pkg.restart();
-    setName("");
-    setCondition("");
-    setConfirmed(false);
-    setNotes("");
-    setReceiptError("");
-    update(false, "This package was restarted from the beginning.");
+    setDemoBusy(true);
+    setDemoError("");
+    try {
+      const fresh = await trackingApi.updateStatus(pkg.barcode, next, "Status changed from the tracking demo controls");
+      animateRef.current = true;
+      setLive("Status changed to " + fresh.status + ".");
+      setPkg(fresh);
+    } catch (error) {
+      setDemoError(error.message);
+    } finally {
+      setDemoBusy(false);
+    }
   }
 
   return (
@@ -293,7 +350,7 @@ function DetailView({ pkg, setPkg }) {
                 <tr>
                   <th scope="row">Cart Battery</th>
                   <td>
-                    {pkg.cart.id}, {pkg.cart.batteryPct}% battery
+                    {pkg.hasCart ? pkg.cart.id + ", " + pkg.cart.batteryPct + "% battery" : "No cart assigned yet"}
                   </td>
                 </tr>
               </tbody>
@@ -519,7 +576,10 @@ function DetailView({ pkg, setPkg }) {
             </div>
             {demoOpen && (
               <div id="demo-panel" className="slide-panel">
-                <p className="hint">For presenting this build. Later the courier's updates will drive these changes.</p>
+                <p className="hint">
+                  For presenting this build. Moving the status forward here updates the shared database, so the
+                  operator and courier pages see it too.
+                </p>
                 <div className="btn-row">
                   <button
                     type="button"
@@ -533,13 +593,13 @@ function DetailView({ pkg, setPkg }) {
                   >
                     {paused ? "Resume cart" : "Pause cart"}
                   </button>
-                  <button type="button" className="btn btn-secondary" disabled={finished} onClick={advanceStatus}>
+                  <button type="button" className="btn btn-secondary" disabled={finished || demoBusy} onClick={advanceStatus}>
                     {advanceLabels[pkg.status] || "Advance status"}
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={restartPackage}>
-                    Restart this package
-                  </button>
                 </div>
+                <p className={"feedback" + (demoError ? " error" : "")} role="alert">
+                  {demoError}
+                </p>
               </div>
             )}
           </section>
