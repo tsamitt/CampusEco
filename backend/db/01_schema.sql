@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS Packages;
 DROP TABLE IF EXISTS Preferences;
 DROP TABLE IF EXISTS Carts;
 DROP TABLE IF EXISTS Buildings;
+DROP TABLE IF EXISTS Operators;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE Buildings (
@@ -102,6 +104,16 @@ CREATE TABLE Couriers (
   UNIQUE KEY UX_Couriers_Email (Email),
   CONSTRAINT CK_Couriers_Shift CHECK (Shift IN ('Morning','Midday','Afternoon')),
   CONSTRAINT CK_Couriers_Role CHECK (Role IN ('Driver','Walker'))
+) ENGINE=InnoDB;
+
+CREATE TABLE Operators (
+  Id           INT          NOT NULL AUTO_INCREMENT,
+  Name         VARCHAR(80)  NOT NULL,
+  Email        VARCHAR(120) NOT NULL,
+  PasswordHash VARCHAR(200) NOT NULL,
+  RegisteredAt DATETIME(6)  NOT NULL, -- stored in UTC
+  PRIMARY KEY (Id),
+  UNIQUE KEY UX_Operators_Email (Email)
 ) ENGINE=InnoDB;
 
 -- A claimed package that is still at the hub shows as "Claimed" on the courier pages.

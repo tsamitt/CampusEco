@@ -10,6 +10,8 @@ public class CampusEcoContext : DbContext
     public DbSet<Package> Packages => Set<Package>();
     public DbSet<PackageHistory> PackageHistory => Set<PackageHistory>();
     public DbSet<DeliveryCart> Carts => Set<DeliveryCart>();
+    public DbSet<Operator> Operators { get; set; }
+
     public DbSet<Building> Buildings => Set<Building>();
     public DbSet<UserPreferences> Preferences => Set<UserPreferences>();
     public DbSet<Courier> Couriers => Set<Courier>();

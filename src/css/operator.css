@@ -265,3 +265,90 @@ tr[data-group="delivered"] {
     opacity: 0;
     pointer-events: none;
 }
+
+.operator-auth {
+    max-width: 480px;
+    margin: 40px auto;
+    padding: 28px;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.1);
+}
+
+.operator-auth h2,
+.operator-auth h3 {
+    margin-top: 0;
+}
+
+.operator-auth form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.operator-auth input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.operator-auth-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.operator-auth-tabs button {
+    flex: 1;
+}
+
+.operator-auth-tabs button.active {
+    background-color: #245b40;
+    color: white;
+}
+
+.operator-auth .strength-meter {
+    height: 7px;
+    background: #e5e5e5;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.operator-auth .strength-fill {
+    height: 100%;
+    transition: width 200ms ease;
+}
+
+.operator-account-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 16px;
+    margin: 15px 0 25px;
+    background: #f2f5f3;
+    border-radius: 8px;
+}
+
+.operator-account-bar div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.operator-account-bar span {
+    font-size: 0.9rem;
+    color: #6c6969;
+}
+
+@media (max-width: 500px) {
+    .operator-auth {
+        margin: 20px 10px;
+        padding: 20px;
+    }
+
+    .operator-account-bar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

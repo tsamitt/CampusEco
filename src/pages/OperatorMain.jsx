@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import OperatorAuth from "../components/operatorAuth.jsx";
 
 import "./../css/operator.css";
 export const PACKAGE_API_URL = (import.meta.env.VITE_API_URL || "http://localhost:5080") + "/api/packages";
 
+import {
+    loadSignedInOperator,
+    clearSignedInOperatorId
+} from "../Api/operatorApi.js";
 const STATUS_NAMES = [
     "Checked In",
     "Awaiting Pickup",
@@ -50,7 +55,7 @@ function mapPackage(dto) {
     };
 }
 
-export default function OperatorMain() {
+function OperatorDashboard({ operator, onSignOut }) {
     const [packages, setPackages] = useState([]);
     const [search, setSearch] = useState("");
     const [buildingFilter, setBuildingFilter] = useState("");
@@ -294,7 +299,16 @@ export default function OperatorMain() {
             <main>
                 <section>
                     <h2>Operators</h2>
+                    <div className="operator-account-bar">
+                        <div>
+                            <strong>Signed in as {operator.name}</strong>
+                            <span>{operator.email}</span>
+                        </div>
 
+                        <button type="button" onClick={onSignOut}>
+                            Sign Out
+                        </button>
+                    </div>
                     {pendingBarcode && (
                         <section
                             id="action-banner"
@@ -645,5 +659,76 @@ export default function OperatorMain() {
             }
 
         </>
+    );
+}
+
+export default function OperatorMain() {
+    const [operator, setOperator] = useState(null);
+    const [checkingLogin, setCheckingLogin] = useState(true);
+    const [authError, setAuthError] = useState("");
+
+    async function loadOperator() {
+        setCheckingLogin(true);
+        setAuthError("");
+
+        try {
+            const currentOperator = await loadSignedInOperator();
+            setOperator(currentOperator);
+        } catch (error) {
+            setAuthError(error.message);
+        } finally {
+            setCheckingLogin(false);
+        }
+    }
+
+    useEffect(() => {
+        loadOperator();
+    }, []);
+
+    function handleSignOut() {
+        clearSignedInOperatorId();
+        setOperator(null);
+    }
+
+    if (checkingLogin) {
+        return (
+            <main>
+                <section>
+                    <h2>Operator Portal</h2>
+                    <p>Checking operator account...</p>
+                </section>
+            </main>
+        );
+    }
+
+    if (authError) {
+        return (
+            <main>
+                <section>
+                    <h2>Operator Portal</h2>
+                    <p className="feedback error" role="alert">
+                        {authError}
+                    </p>
+                    <button type="button" onClick={loadOperator}>
+                        Try Again
+                    </button>
+                </section>
+            </main>
+        );
+    }
+
+    if (!operator) {
+        return (
+            <OperatorAuth
+                onAuthenticated={(newOperator) => setOperator(newOperator)}
+            />
+        );
+    }
+
+    return (
+        <OperatorDashboard
+            operator={operator}
+            onSignOut={handleSignOut}
+        />
     );
 }

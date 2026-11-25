@@ -2,6 +2,9 @@
 import { useState, useRef } from "react";
 import "./../css/operator.css";
 import { PACKAGE_API_URL } from "./OperatorMain"
+import { useEffect } from "react";
+import { useSignedInOperator } from "../components/OperatorShared";
+
 function OperatorPackageInput() {
 
     // Form State
@@ -36,7 +39,17 @@ function OperatorPackageInput() {
     const buildingRef = useRef(null);
 
     // Form submission
+    const {
+        loading: authLoading,
+        operator,
+        error: authError
+    } = useSignedInOperator();
 
+    useEffect(() => {
+        if (!authLoading && !authError && !operator) {
+            window.location.replace("/operatorAuth.html");
+        }
+    }, [authLoading, authError, operator]);
     async function handleSubmit(event) {
 
         event.preventDefault();
@@ -155,7 +168,22 @@ function OperatorPackageInput() {
         }
     }
 
+    if (authLoading) {
+        return <main><p>Checking operator credentials...</p></main>;
+    }
 
+    if (authError) {
+        return (
+            <main>
+                <p className="feedback error">{authError}</p>
+                <a href="/operatorAuth.html">Return to Login</a>
+            </main>
+        );
+    }
+
+    if (!operator) {
+        return null;
+    }
     return (
 
         <main>
