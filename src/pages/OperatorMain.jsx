@@ -426,7 +426,7 @@ function OperatorDashboard({ operator, onSignOut }) {
                         {!isLoading && !loadError && filteredPackages.length === 0 && (
                             <p>No matching packages found.</p>
                         )}
-                        <div class="table-container">
+                        <div className="table-container">
                             <table id="package-activity-table">
                                 <caption>Recently checked-in packages</caption>
                                 <thead>
@@ -484,7 +484,7 @@ function OperatorDashboard({ operator, onSignOut }) {
 
                     <section>
                         <h3>Urgent Deliveries</h3>
-                        <div class="table-container">
+                        <div className="table-container">
                             <table>
                                 <caption>Packages that must be delivered urgently</caption>
                                 <thead>

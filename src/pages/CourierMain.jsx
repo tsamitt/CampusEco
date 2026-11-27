@@ -373,7 +373,7 @@ export default function CourierMain() {
                 ))}
               </select>
             </div>
-            <div class="table-container">
+            <div className="table-container">
               <table id="queue-table">
                 <caption>
                   Route queue: deliveries waiting to be claimed (<span id="queue-count">{queue.length}</span>)
@@ -446,7 +446,7 @@ export default function CourierMain() {
               />{" "}
               Hide delivered packages
             </label>
-            <div class="table-container">
+            <div className="table-container">
               <table id="my-table">
                 <caption>
                   Deliveries you have claimed (<span id="my-count">{activeCount + " active"}</span>)
